@@ -18,6 +18,39 @@ and against any built UI before you call it done.
 - Visible tiled-PNG noise that repeats.
 - Cramped spacing; no focal point; everything the same weight.
 
+> Dated tells specifically: neumorphism, literal-texture skeuomorphism (leather/wood), glass-on-everything,
+> flat-purple-blob "mesh," constant-glitch cyberpunk. When the brief is "make it feel human, not AI-made,"
+> the named 2026 counter-movements are **warm/neo-minimalism** and **collage/scrapbook** (see `aesthetics.md`).
+
+## The category-reflex check (two altitudes)
+
+Slop is a *reflex*. Run this twice before committing a direction — the second altitude catches what the
+first one misses:
+
+- **First-order:** could someone guess the theme + palette from the *category alone*? ("Fintech dashboard
+  → navy + a blue accent." "AI tool → dark + purple." "Wellness → clinical blue + rounded sans.") If yes,
+  it's the first training-data reflex — rework the scene sentence and color strategy until the answer isn't
+  obvious from the domain.
+- **Second-order:** could someone guess the aesthetic *family* from *category + the obvious anti-reference*?
+  ("AI tool that's *not* dark-purple → editorial-typographic." "Fintech that's *not* navy → terminal-dark."
+  "Wellness that's *not* clinical-blue → warm-beige-minimal.") This is the trap one tier deeper: you dodged
+  the default and landed in the **saturated escape-hatch** everyone else who dodged it also landed in.
+  Rework until **both** answers are non-obvious.
+
+**Currently-saturated escape-hatch lanes (the second-order traps of 2026)** — don't default *into* one just
+because it's "not the obvious thing":
+- **Editorial-typographic** (giant serif headline + lots of whitespace + a thin rule) — the default
+  "tasteful" escape from SaaS-cream.
+- **Warm-beige / "cozy minimal"** (oat/sand bg + a character serif + grain) — the default escape from
+  clinical-blue.
+- **Terminal / monospace-dark** (mono everything + green-on-black + a grid) — the default escape from
+  corporate-navy.
+- **Brutalist-lite** (one huge type size + hard borders + a single acid accent) — the default escape from
+  "boring corporate."
+
+One of these *chosen on purpose, expressing a concept* is a real direction. One reached for *because it's
+the non-default default* is just slop one level up. Name the concept reason, or pick again.
+
 ## The expensive levers (pull these)
 - **Generous *active* whitespace** — start with too much, then remove. The cheapest premium signal.
 - **A typeface with a point of view** — escape the defaults; spend your one bold type choice.

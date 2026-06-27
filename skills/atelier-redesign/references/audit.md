@@ -19,6 +19,10 @@ For redesigns, brand equity (recognizable color/logo/voice) is a constraint to p
 - Framework (Next/React/Vue/Astro/WordPress/etc.), CSS approach (Tailwind? CSS-in-JS? vanilla?), component
   lib, build. The Atelier default is Tailwind v4 + shadcn, but **work within the existing stack** unless a
   migration is explicitly wanted.
+- Note hand-rolled JS that's now retire-able for native Baseline primitives — JS-positioned tooltips/menus/
+  popovers (Floating UI/Popper → Popover API + anchor positioning), modal libs (→ native `<dialog>`),
+  auto-resize-textarea scripts (→ `field-sizing: content`), JS accordions (→ `<details name>`). Flagging
+  these is a high-value, low-risk modernization lever, not a rewrite.
 
 ## 4. Inventory the design system (or its absence)
 Score each — present + good / present + weak / absent:
@@ -42,7 +46,10 @@ everything the same weight.
 ## 6. Name the missing "expensive" levers
 Which are absent: generous active whitespace · a typeface with a point of view · a whisper of grain ·
 perceptual OKLCH color + real tokens · tinted neutrals · one disciplined accent · elevation-by-lightness
-(dark) · real grid/baseline discipline · intentional asymmetry · one purposeful signature moment.
+(dark) · real grid/baseline discipline · intentional asymmetry · one purposeful signature moment ·
+honoring OS preferences (`prefers-reduced-motion` / `-color-scheme` / `-contrast` / `-reduced-transparency` /
+`forced-colors`) —
+respecting user intent is itself a premium signal, and ignoring it is a tell.
 
 ## Output — the audit report
 A short report: (a) brand/IA/stack summary, (b) the design-system scorecard above, (c) the specific slop

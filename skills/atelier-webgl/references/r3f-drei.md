@@ -57,6 +57,11 @@ extend(THREE as any);                                    // Node materials usabl
 </Canvas>
 ```
 
+Feature-detect before committing UI to WebGPU: `const hasWebGPU = !!navigator.gpu` — and note even when the
+API exists, `await navigator.gpu.requestAdapter()` can return `null` on a blocklisted GPU. The async `gl`
+factory's auto-fallback covers *unsupported* engines at **init**; a *runtime* device-loss still needs the
+poster swap (`renderer.getDevice?.().lost` → fallback — see `integration-fallbacks.md`).
+
 ## Drei — the helpers you'll actually use
 ```tsx
 import { OrbitControls, Environment, useGLTF, Html, Text, Instances, Instance,
@@ -76,6 +81,18 @@ import { OrbitControls, Environment, useGLTF, Html, Text, Instances, Instance,
 - **`<PerformanceMonitor>` / `<AdaptiveDpr>`** — auto-scale quality to measured FPS.
 - **`<Float>`, `<Stage>`, `<Center>`, `<ContactShadows>`** — staging niceties.
 
+## R3F add-ons & ecosystem
+- **Physics → `@react-three/rapier`** (Rapier, Rust→WASM) — the current standard: fast, **deterministic**,
+  v2 supports R3F v9 / React 19. (Older `@react-three/cannon` is effectively superseded.)
+- **Post-processing → `@react-three/postprocessing`** — wires the `postprocessing` composer (bloom, DoF,
+  SSAO, vignette) into R3F declaratively. Cheaper/cleaner than rolling EffectComposer by hand.
+- **In-canvas UI → `@react-three/uikit`** (`@pmndrs/uikit`, v1) — real flexbox UI (buttons/text/inputs,
+  scroll, theming) rendered **inside** WebGL via Yoga; instanced + fast. Use for HUDs and **spatial/VR**
+  menus that must live in the GL layer — vs `<Html>`, which is a DOM overlay (not GL-native or VR-capable).
+- **Gaussian Splatting (3DGS)** — photoreal radiance-field scenes in-browser. **Spark** (`@sparkjsdev/spark`,
+  Three.js) fuses splats *and* mesh, 98%+ WebGL2, reads `.PLY/.SPZ/.SPLAT/.SOG`; Three.js and Babylon 9 also
+  load splats natively. Files are heavy (tens of MB) → lazy-load, LOD, and ship a poster fallback.
+
 ## Custom shader material in R3F (Drei factory)
 ```tsx
 import { shaderMaterial } from "@react-three/drei";
@@ -93,8 +110,34 @@ function Plane(){ const m=useRef<any>(null!); useFrame((_,dt)=>{ m.current.uTime
 ```
 (See `shaders-glsl-tsl.md` for the shader effects themselves.)
 
+## Compressed assets — loader wiring (KTX2 / DRACO / Meshopt)
+Compression only kicks in if the loader is configured. In **R3F**, `useGLTF` wires DRACO + Meshopt for you
+(local decoder: `useGLTF(url, "/draco/")`); for **KTX2/Basis** textures inside a glTF, extend the loader:
+```ts
+import { useGLTF } from "@react-three/drei";
+import { KTX2Loader } from "three/addons/loaders/KTX2Loader.js";
+// 4th arg extends the GLTFLoader; gl from useThree()
+useGLTF(url, true, true, (loader) =>
+  loader.setKTX2Loader(new KTX2Loader().setTranscoderPath("/basis/").detectSupport(gl)));
+```
+**Vanilla Three** — wire all three onto the GLTFLoader once and reuse:
+```ts
+import { GLTFLoader }   from "three/addons/loaders/GLTFLoader.js";
+import { DRACOLoader }  from "three/addons/loaders/DRACOLoader.js";
+import { KTX2Loader }   from "three/addons/loaders/KTX2Loader.js";
+import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
+const draco = new DRACOLoader().setDecoderPath("/draco/");
+const ktx2  = new KTX2Loader().setTranscoderPath("/basis/").detectSupport(renderer);
+const loader = new GLTFLoader().setDRACOLoader(draco).setKTX2Loader(ktx2).setMeshoptDecoder(MeshoptDecoder);
+```
+Self-host the decoder/transcoder files (copy from `three/examples/jsm/libs/{draco,basis}/`). KTX2 GPU-
+compressed textures stay compressed in VRAM (~4–8× smaller than decoded PNG/JPG) and transcode to the GPU's
+native format — the single biggest texture-memory win on mobile.
+
 ## Performance rules (same as raw Three)
-- **Draw calls dominate** → instancing / `BatchedMesh` / merge geometry / reuse materials.
+- **Draw calls dominate** → keep them **< 100** (>500 degrades even strong GPUs); watch
+  `renderer.info.render.calls`. Collapse via instancing / `BatchedMesh` (different geos, one material) / merge
+  geometry / reuse materials. Watch `renderer.info.memory` for leaks (GPU resources never GC).
 - **Dispose** geometries/textures/render-targets on teardown (R3F handles unmount; manual for dynamic).
 - Clamp DPR ≤ 2; compress assets (DRACO/Meshopt geometry, KTX2/Basis textures).
 - Lazy-load the Canvas (dynamic import); pause with `frameloop="demand"` or IntersectionObserver when

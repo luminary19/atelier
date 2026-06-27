@@ -1,8 +1,10 @@
 # Motion (motion/react) recipes
 
-Package: `motion` (the renamed Framer Motion). Import from `motion/react`. Hybrid engine — runs on
-WAAPI (hardware-accelerated, off main thread) where it can, JS engine for springs/layout. Shrink the
-bundle with `LazyMotion` + `domAnimation`.
+Package: `motion` (the renamed Framer Motion). Import from `motion/react` (use `motion/react-client` to
+mark components client in RSC trees). Hybrid engine — runs on WAAPI (hardware-accelerated, off main
+thread) where it can, JS engine for springs/layout. Shrink the bundle with `LazyMotion` + `domAnimation`.
+**Springs default only for transforms** (x/y/scale/rotate); opacity/color default to tween/ease — override
+per-property in `transition`. (Vue is a separate package, `motion-v`, not this import.)
 
 ## Basics — animate, gestures
 ```tsx
@@ -83,5 +85,6 @@ import { LazyMotion, domAnimation, m } from "motion/react";
   <m.div animate={{ opacity: 1 }} />   {/* use `m`, not `motion`, inside LazyMotion */}
 </LazyMotion>
 ```
-Use `motion/mini`'s `animate` (~2.3KB) for one-off vanilla WAAPI tweens. Keep everything to
-`transform`/`opacity`; springs/layout run on the JS engine (still smooth, just not WAAPI).
+All-in `motion` component ≈34KB; `LazyMotion` + `m` cuts it hard — `domAnimation` ≈6KB initial, `domMax`
+adds drag/layout. Use `motion/mini`'s `animate` (~2.3KB, pure WAAPI) for one-off vanilla tweens. Keep
+everything to `transform`/`opacity`; springs/layout run on the JS engine (still smooth, just not WAAPI).

@@ -8,8 +8,11 @@ mine it (below) before inventing anything.
   production-realistic. Mine for motion, scroll choreography, signature moments.
 - **Godly (godly.website)** — curated, *video* thumbnails (captures motion). Best for the motion layer.
 - **Mobbin** — real app flows (onboarding, paywalls, settings, edge cases). The research tool for
-  product/app/dashboard UX — use for *patterns*, not eye candy.
-- **Land-book / SaaS Landing Page / Lapa Ninja / Refero** — landing & real-product layouts, hero
+  product/app/dashboard UX — use for *patterns*, not eye candy. **Ships a Mobbin MCP** (2026) that
+  feeds real app screens straight to the agent — ask it instead of browsing.
+- **Refero** — real product screenshots + flows; its **Refero MCP** adds a `DESIGN.md` layer (real
+  product *styles*) so the agent can reason about visual direction *before* generating UI.
+- **Land-book / SaaS Landing Page / Lapa Ninja** — landing & real-product layouts, hero
   patterns, pricing, conversion structure.
 - **siteInspire (clean/editorial) / Minimal Gallery / Httpster / The FWA (experimental)** — curated
   showcases by temperament.
@@ -25,11 +28,15 @@ mine it (below) before inventing anything.
 - **Obys** — bold editorial typography + motion (Awwwards-decorated).
 - **Cuberto** — fluid cursor/gooey interactions, slick micro-interactions.
 - **Unseen Studio / Aristide Benoist** — refined motion + type; advanced WebGL/shaders.
+- **OFF+BRAND** — Webflow shell + WebGL/Rive cinematic motion; the current Awwwards SOTY studio.
 - **Codrops (tympanus)** — the tutorial engine of this whole scene; read recent posts to see what's hot.
 
 ## What's actually winning now (mid-2026)
-The representative award stack: **Webflow shell + WebGL 3D + Rive motion graphics + scroll-driven
-cinematic transitions + Lenis smooth scroll** (e.g. OFF+BRAND's SOTY work). Trend toward **faux-3D**
+**Awwwards Site of the Year 2025 = the official Lando Norris site by OFF+BRAND** (also SOTM/SOTD/FWA;
+SOTD score 8.18). The representative award stack: **Webflow shell + WebGL/WebGPU 3D + Rive motion +
+GSAP/scroll-driven cinematic transitions + Lenis smooth scroll**, on a tight 2-color system (lime
+`#D2FF00` on `#111112`), 3D rotating helmets + millisecond-timed scroll choreography. **Treat SOTY as a
+*tier*, not one canonical site — Awwwards crowns several annual winners.** Trend toward **faux-3D**
 (image sequences / shader tricks) to dodge real-WebGL perf cost. On award sites, *motion is the product.*
 On production sites, the winning formula is the opposite: bento grids, restraint, real content, speed,
 accessibility, sub-400ms responsiveness.

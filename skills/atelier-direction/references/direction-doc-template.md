@@ -36,6 +36,10 @@ doc — just state the Design Read + the 2–3 decisions that matter). Keep it t
 **Layout archetype:** <e.g. "asymmetric hero → bento features → editorial rows → CTA; Z-scan">
   → feeds atelier-layout (it builds the grid + composition + whitespace + responsive)
 
+**Visual assets:** <icon set + style · illustration voice (or none) · imagery medium + treatment · OG/favicon intent>
+  → feeds atelier-components (icon system, responsive images, treatment, favicon/OG); art-direction in
+  atelier-direction/references/imagery-and-iconography.md
+
 **Build stack:** Tailwind v4 + shadcn/ui  (or: <existing project stack, if it dictates otherwise>)
 
 **References:** <URLs/products + the specific decisions mined from each — grid/type/color/motion>
@@ -78,6 +82,10 @@ metrics band (tabular, dense by intent). Not airy (it's a product, not a gallery
 
 **Layout archetype:** asymmetric hero (giant headline left, graph right) → 2-3-2 bento feature grid
 with one hero cell → alternating editorial proof rows → metrics band → CTA. Z-scan.
+
+**Visual assets:** Lucide outline icons (1.75 stroke) matched to the grotesque; no character illustration —
+abstract node/graph motifs only; product screenshots graded to the teal palette + grain; a designed OG card
+(logo + headline on the ink bg) and a real favicon set.
 
 **References:** linear.app (elevation-by-lightness, hairlines, restraint), vercel.com (Geist, grain),
 the user's existing logo/teal.

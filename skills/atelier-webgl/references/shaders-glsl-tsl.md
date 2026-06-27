@@ -4,7 +4,8 @@
 Two GPU stages per draw:
 - **Vertex shader** — runs per vertex; outputs clip-space position (`gl_Position = projectionMatrix *
   modelViewMatrix * vec4(position,1.)`); can displace geometry; passes data via `varying`/`out`.
-- **Fragment shader** — runs per pixel; outputs color (`gl_FragColor`). 99% of effects live here.
+- **Fragment shader** — runs per pixel; outputs color — `gl_FragColor` in GLSL ES 1.00 (Three's
+  `ShaderMaterial` default), or a `out vec4` you declare in GLSL ES 3.00. 99% of effects live here.
 
 Data flow: **attributes** (per-vertex: position, normal, uv) → vertex; **uniforms** (constant per draw:
 time, resolution, textures) → both; **varyings** (interpolated vertex→fragment: uv, world pos).
@@ -14,7 +15,7 @@ Update animated uniforms each frame: `material.uniforms.uTime.value = clock.getE
 
 ## Canonical fragment effects (copy-paste, tune)
 These are **fragment-shader snippets** — they assume the varyings/uniforms below are declared and fed by a
-companion vertex shader. Minimal scaffold (with `ShaderMaterial`, Three injects the matrices/`uv`/`normal`):
+companion vertex shader. Minimal scaffold (GLSL ES 1.00 — the default `ShaderMaterial`; Three injects the matrices/`uv`/`normal`):
 ```glsl
 /* VERTEX */
 varying vec2 vUv; varying vec3 vNormal, vView;
@@ -48,8 +49,8 @@ vec4 tex = texture2D(uMap, uv);
 float fres = pow(1.0 - max(dot(normalize(vView), normalize(vNormal)), 0.0), uPower);
 
 // --- 5. Ordered (Bayer 4x4) dithering — retro 1-bit / banding-free shading ---
-// REQUIRES WebGL2 / GLSL ES 3.00: the int[](…) initializer + non-constant indexing won't compile in a
-// default ShaderMaterial (GLSL ES 1.00). Set `new THREE.ShaderMaterial({ glslVersion: THREE.GLSL3, … })`.
+// GLSL ES 3.00 ONLY (WebGL2): the int[](…) array-constructor initializer + reliable dynamic indexing don't
+// exist in a default (ES 1.00) ShaderMaterial. Needs glslVersion: THREE.GLSL3 — see the version note below.
 float bayer(vec2 p){ int x=int(mod(p.x,4.)),y=int(mod(p.y,4.));
   int m[16]=int[](0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5);
   return float(m[y*4+x])/16.; }
@@ -60,6 +61,14 @@ float n = fbm(vUv*2.0 + uTime*0.05);
 vec3 col = mix(uColorA, uColorB, smoothstep(0.3,0.7,n));
 col = mix(col, uColorC, smoothstep(0.5,0.9,fbm(vUv*3.0 - uTime*0.03)));
 ```
+> **GLSL ES 1.00 vs 3.00 — read before using effect 5.** The scaffold + effects 1–6 are GLSL ES **1.00**
+> (the default `ShaderMaterial`: `varying`, `texture2D`, write `gl_FragColor`). Effect 5 needs **ES 3.00**:
+> `new THREE.ShaderMaterial({ glslVersion: THREE.GLSL3, … })`, which flips the *whole* shader —
+> `varying`→`in`/`out`, `texture2D`→`texture()`, and `gl_FragColor`→a `out vec4 fragColor;` **you declare**
+> (Three still injects `position`/`uv`/`normal` + matrices). It's not a drop-in into the ES 1.00 scaffold —
+> convert the entire material when you enable it. (`RawShaderMaterial` needs the `#version 300 es` line +
+> all declarations yourself.)
+
 For **SDF metaballs**, sum signed-distance fields and blend with `smin` (smooth-min); for grain, add a
 hash-noise term at low amplitude.
 

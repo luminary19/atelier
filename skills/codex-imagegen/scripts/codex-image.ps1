@@ -25,7 +25,8 @@ param(
     [string]   $Size         = "1024x1024",
     [switch]   $Transparent,
     [string]   $Model,
-    [string]   $Edit,                                  # path to source image => edit mode
+    [string]   $Edit,                                  # path to source image => edit mode (MODIFIES the image)
+    [string]   $Anchor,                                # path to a STYLE-ANCHOR image => attach as -i reference for a NEW generation (palette/quality/scheme only, never copied)
     [ValidateSet("bypass","workspace-write","danger-full-access")]
     [string]   $Sandbox      = "bypass",
     [int]      $TimeoutSec   = 420,
@@ -48,11 +49,30 @@ try {
     if (-not $auth.tokens -and -not $auth.OPENAI_API_KEY) { Fail "auth.json has no ChatGPT tokens and no key. Run 'codex login'." }
 } catch { Fail "Could not parse $authPath : $_" }
 
+if ($Edit -and $Anchor) {
+    Fail "Use -Edit OR -Anchor, not both: -Edit MODIFIES the source image; -Anchor attaches it as a style reference for a NEW generation."
+}
 if ($Edit) {
     if (-not (Test-Path $Edit)) { Fail "Edit source image not found: $Edit" }
     $Edit = (Resolve-Path $Edit).Path
-} elseif (-not $Prompt) {
-    Fail "Provide -Prompt (generate mode) or -Edit <image> + -Prompt (edit mode)."
+} else {
+    if (-not $Prompt) { Fail "Provide -Prompt (generate), -Edit <image> + -Prompt (edit), or -Anchor <image> + -Prompt (style-anchored generate)." }
+    if ($Anchor) {
+        if (-not (Test-Path $Anchor)) { Fail "Anchor image not found: $Anchor" }
+        $Anchor = (Resolve-Path $Anchor).Path
+    }
+}
+
+# ---- sanitize prompt for safe native-arg passing ---------------------------
+# PowerShell 5.1 + the npm `codex` shim mangle native arguments that contain
+# embedded double-quotes: the arg gets split at each `"`, so `codex exec` sees the
+# tail of the prompt as stray positional args and aborts ("unexpected argument ...").
+# Image prompts never *need* raw double-quotes, so normalize straight + smart double
+# quotes to single quotes and flatten newlines/tabs/runs-of-spaces into single spaces.
+if ($Prompt) {
+    $Prompt = $Prompt -replace '[“”„‟″‶"]', "'"
+    $Prompt = $Prompt -replace '[\r\n\t]+', ' '
+    $Prompt = ($Prompt -replace '\s{2,}', ' ').Trim()
 }
 
 # ---- output dir + snapshot -------------------------------------------------
@@ -82,10 +102,14 @@ Prompt: $Prompt
 # NOTE: the built-in tool has no path argument and saves under `$CODEX_HOME`. This script
 # locates and copies the result, so we do NOT ask the agent to move files (it does that
 # unreliably and then claims success). We only ask it to generate and stop.
+$anchorRule = ""
+if ($Anchor) {
+    $anchorRule = "`n- The attached image is a STYLE ANCHOR ONLY: match its colour palette, colour scheme, material quality, lighting, and finish so the result clearly belongs to the same world - but do NOT copy its composition, subject, framing, layout, or specific elements. Generate a NEW image from the Prompt above; the anchor is a palette/quality reference, never a template to reproduce."
+}
 $fullPrompt = @"
 You are running headless. $task
 
-Hard rules:
+Hard rules:$anchorRule
 - Use the built-in image_gen tool ONLY. Do NOT run the python image_gen.py fallback CLI.
 - Do NOT ask for, set, or use an OPENAI_API_KEY. Your existing session auth is sufficient.
 - Do not ask questions and do not wait for approval; just generate the image(s) now.
@@ -102,8 +126,11 @@ switch ($Sandbox) {
     "danger-full-access" { $cxArgs += @("-s","danger-full-access") }
 }
 if ($Model) { $cxArgs += @("-m",$Model) }
-if ($Edit)  { $cxArgs += @("-i",$Edit) }
+# Positional prompt MUST precede -i: `-i/--image <FILE>...` is variadic and would
+# otherwise greedily consume the prompt, leaving codex to read an (empty) stdin.
 $cxArgs += $fullPrompt
+if ($Edit)       { $cxArgs += @("-i",$Edit) }
+elseif ($Anchor) { $cxArgs += @("-i",$Anchor) }
 
 if ($DryRun) {
     "DRY RUN - would execute:"

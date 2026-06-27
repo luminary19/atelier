@@ -15,14 +15,25 @@ Tailwind v4 is CSS-first — no `tailwind.config.js`. In your global CSS:
 }
 ```
 (Vite: `npm create vite@latest` + `@tailwindcss/vite` plugin instead of postcss.)
+(Prefer typed, JS-authored, scoped styles at scale? **StyleX** (Meta, compile-time atomic, RSC-safe) or
+**Panda CSS** (zero-runtime, recipes/presets) are the alternatives to utility CSS — pick one *instead of*
+Tailwind, not alongside.)
 
 ## shadcn/ui init
 ```bash
-npx shadcn@latest init           # pick Base UI (modern, MUI team) or Radix (broadest set)
+npx shadcn@latest init --base base   # --base base (MUI-team Base UI v1) or radix (broadest set)
 npx shadcn@latest add button card dialog dropdown-menu input label sonner
 ```
+- **CLI v4** scaffolds **full projects** (Next.js / Vite / React Router / Astro / TanStack Start / Laravel;
+  `--monorepo`; dark mode auto-wired for Next/Vite); `--dry-run`/`--diff`/`--view` preview before write.
+  **Presets** (`init --preset <code>`) pack a whole design system (colors/theme/fonts/radius/icons) into one
+  shareable code. An **MCP server** (`npx shadcn@latest mcp init --client claude` writes `.mcp.json`; tools to
+  search/view/add registry items — including any private **`@atelier` registry** you host, see
+  `references/registry.md`) + `shadcn/skills` make installs agent-native; `shadcn add` also pulls from
+  **namespaced registries** (`@v0/dashboard`, `@ai-elements/input`) and **any public GitHub repo**
+  (`shadcn add <user>/<repo>/<item>`, no build step). Let the agent drive it so tokens + variants wire up.
 - `components.json` controls paths + style; with v4 it leaves `tailwind.config` blank and
-  `cssVariables: true`.
+  `cssVariables: true`. Named style variants exist (e.g. Luma default / Rhea compact-density).
 - shadcn copies component **source** into `components/ui/` — you own + edit it.
 - Helpers it installs: `lucide-react` (icons), `class-variance-authority` (cva, for variants),
   `clsx` + `tailwind-merge` exposed as `cn()`.

@@ -5,8 +5,8 @@ Premium app UI blocks (React + Tailwind v4 + shadcn), token-driven, accessible. 
 (it's data, not marketing). Adapt to the Direction Doc; verify with `atelier-perf-a11y`.
 
 ## Contents
-App shell (sidebar + topbar) · KPI / stat cards · Section header · Data table · Settings form ·
-Command-palette wiring · Empty / loading states
+App shell (sidebar + topbar) · KPI / stat cards · Section header · Data table · Settings form (+ rhf/zod
+validation) · Tabs / segmented / pagination · Command-palette wiring · Empty / loading states
 
 ---
 
@@ -36,6 +36,11 @@ Command-palette wiring · Empty / loading states
 ```
 Mobile: hide the sidebar, move nav into a Vaul drawer triggered from the topbar.
 
+> **Heavier sidebar?** For a collapsible, cookie-persisted, ⌘B-toggle sidebar with icon/offcanvas/inset
+> modes, install shadcn's `sidebar` block (`sidebar-07` = the canonical app-sidebar + nav-user +
+> team-switcher) and theme it on your tokens — it's the composition base to **de-template**, not the final
+> look (`npx shadcn@latest add sidebar-07`).
+
 ## KPI / stat cards
 ```tsx
 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -50,7 +55,9 @@ Mobile: hide the sidebar, move nav into a Vaul drawer triggered from the topbar.
   ))}
 </div>
 ```
-`tabular-nums` everywhere numbers update (no width jitter). Pair charts with Tremor.
+`tabular-nums` everywhere numbers update (no width jitter). Pair charts with Tremor. For a card that scales
+to *its own* width (not the viewport), wrap it in `@container/card` and bump the value with
+`@[250px]/card:text-3xl` (container queries → `atelier-layout`).
 
 ## Section header (page title + actions)
 ```tsx
@@ -82,6 +89,9 @@ keyboard-focusable rows, and a real **empty state** (below) instead of a blank t
   </table>
 </div>
 ```
+> **Heavier table?** For drag-reorder rows (dnd-kit), a row-detail `Drawer`, faceted filters, and
+> `toast.promise` saves, shadcn's `dashboard-01` data-table is the canonical TanStack-Table-v8 wiring to
+> adapt (`npx shadcn@latest add dashboard-01`) — strip it to what the screen needs.
 
 ## Settings form (label + help + inline errors)
 ```tsx
@@ -96,6 +106,59 @@ keyboard-focusable rows, and a real **empty state** (below) instead of a blank t
 </form>
 ```
 Optimistic save + Sonner toast (atelier-motion). Every input needs a real `<Label htmlFor>`.
+
+**With validation — react-hook-form + zod + shadcn `<Form>`** (the production default). `npx shadcn@latest
+add form` scaffolds the rhf wrappers; one zod schema is the source of truth for shape *and* messages, and the
+shadcn `<Form*>` parts wire `aria-invalid` / `aria-describedby` / error text automatically:
+```tsx
+"use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+
+const schema = z.object({
+  name: z.string().min(1, "Workspace name is required"),
+  seats: z.coerce.number().int().min(1, "At least one seat"),
+});
+type Values = z.infer<typeof schema>;
+
+function SettingsForm() {
+  const form = useForm<Values>({
+    resolver: zodResolver(schema),
+    defaultValues: { name: "Acme", seats: 3 },
+    mode: "onTouched",            // validate on blur, then re-validate on change once touched
+  });
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-xl space-y-6" noValidate>
+        <FormField control={form.control} name="name" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Workspace name</FormLabel>
+            <FormControl><Input {...field} /></FormControl>
+            <FormMessage />        {/* renders the zod message + links it via aria-describedby */}
+          </FormItem>
+        )} />
+        <Button type="submit" disabled={form.formState.isSubmitting}>Save</Button>
+      </form>
+    </Form>
+  );
+}
+```
+- **Timing:** `mode: "onTouched"` — validate on blur, then live-revalidate touched fields; don't error on the
+  first keystroke. Keep errors inline (`FormMessage`); for long forms also summarize at top and focus the first error.
+- **Never clear input on a failed submit.** `zodResolver` auto-detects zod v3/v4; use `z.coerce.number()` (or
+  `valueAsNumber`) for numeric fields. Multi-step *flow* → `atelier-ux`; form *layout* → `atelier-layout`.
+
+## Tabs, segmented control & pagination
+- **Tabs** (shadcn `tabs`, Radix) — roving focus + arrow keys free; switch views *in place*. Short trigger
+  labels; the active tab carries the one accent. Don't use tabs for sequential steps (that's a flow → `atelier-ux`).
+- **Segmented control** = a styled single-select `ToggleGroup` (shadcn `toggle-group`, `type="single"`) for
+  2–4 mutually-exclusive options (Day/Week/Month). One always selected; animate the active pill with a Motion
+  `layoutId` (atelier-motion).
+- **Pagination** (shadcn `pagination`) — semantic `<nav aria-label="Pagination">` with prev/next + page links;
+  the current page gets `aria-current="page"`. Prefer it over infinite scroll for data users must return to or
+  deep-link; reserve infinite scroll for feeds (and still give it a real loading state + a "Load more" fallback).
 
 ## Command-palette wiring
 ```tsx
@@ -120,5 +183,7 @@ useEffect(() => {
 </div>
 // Loading — skeleton rows (shimmer from atelier-motion; static under reduced motion)
 ```
+> **Primitives:** shadcn's `Empty` (`EmptyHeader`/`EmptyMedia`/`EmptyTitle`/…) is the structural target for
+> this empty state, and `Field`/`FieldError` for the form above — see `curated-components.md`.
 Always design empty + loading + error (atelier-motion's states reference). Run `atelier-perf-a11y`:
 keyboard nav, focus order, labels, contrast, `aria-live` for async updates.

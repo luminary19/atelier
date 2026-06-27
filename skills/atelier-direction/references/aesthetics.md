@@ -1,15 +1,19 @@
 # Aesthetics catalog
 
-The 20 named looks — your search vocabulary and your spine. Each: **signature** (what the eye sees) ·
+The 24 named looks — your search vocabulary and your spine. Each: **signature** (what the eye sees) ·
 **recipe** (the concrete technique) · **examples** · **when** · **avoid** (the cheap version). Pick one,
 or a deliberate pairing. The meta-rule for all: *execute the system, not the surface.*
 
 ## Contents
-- Premium / clean: Dark-tech · Swiss/International · Editorial · Bento · Flat/Material/Material-You
-- Surface / material: Glassmorphism · Skeuomorphism(modern) · Claymorphism · Neumorphism
-- Expressive: Brutalism/Neo-brutalism · Maximalism · Anti-design
-- Atmosphere: Aurora/Mesh gradients · Grain/Noise · Liquid/Metaball · Dithering/Halftone
-- Retro/genre: Y2K/Frutiger Aero · Vaporwave/Synthwave · Cyberpunk/HUD · Kinetic typography
+- Premium / clean: Dark-tech · Swiss/International · Editorial · Bento · Flat/Material(M3-Expressive) · Warm/neo-minimalism
+- Surface / material: Glassmorphism · Skeuomorphism(Liquid Glass) · Claymorphism · Neumorphism
+- Expressive: Brutalism/Neo-brutalism · Maximalism · Collage/scrapbook/zine · Anti-design
+- Atmosphere: Aurora/Mesh gradients · Grain/Noise · Liquid/Metaball · Dithering/Halftone · Risograph/2-ink
+- Retro/genre: Y2K/Frutiger Aero · Vaporwave/Synthwave · Cyberpunk/HUD · Retro system UI (Win9x) · Kinetic typography
+
+> **2026 anti-AI counter-movements:** when the brief is "make it feel human, not AI-made," reach for
+> **Warm / neo-minimalism** or **Collage / scrapbook** below — the two named looks pitched explicitly
+> against AI sameness.
 
 ---
 
@@ -37,11 +41,17 @@ or a deliberate pairing. The meta-rule for all: *execute the system, not the sur
 - **When:** feature overviews, marketing, dashboards, "what I do."
 - **Avoid:** uniform equal boxes (kills hierarchy — the whole point), cards-in-cards, random spans.
 
-## Flat / Material / Material You
-- **Signature:** solid fills; Material adds paper elevation; Material You re-tints the whole UI from a seed color via tonal surface tint.
-- **Recipe:** dynamic color from one seed (HCT → tonal palettes → role tokens); **tonal elevation** (semi-transparent primary overlay) over heavy shadows; M3 type/shape scales; 48dp targets.
+## Flat / Material / Material 3 Expressive
+- **Signature:** solid fills; Material adds paper elevation; the UI re-tints from a seed color via tonal surface tint. **Material 3 Expressive** (current line, Pixel/Android 16) adds shape-morph + spring physics.
+- **Recipe:** dynamic color from one seed (HCT → tonal palettes → role tokens); **tonal elevation** (semi-transparent primary overlay) over heavy shadows; M3 type/shape scales; **expressive shape-morph** (rounded-square → squircle → star) + spring motion on press; 48dp targets. Tooling: `material-color-utilities`.
 - **When:** Android, cross-platform, dashboards, per-user theming.
-- **Avoid:** generic indigo + oversized shadows + default Roboto + random FABs.
+- **Avoid:** generic indigo + oversized shadows + default Roboto + random FABs (none of the tonal/role system).
+
+## Warm / neo-minimalism
+- **Signature:** minimalism's restraint and whitespace, but *warm and human* — earthy low-saturation palette, a whisper of texture, character serifs. The headline 2026 successor to sterile flat/AI minimalism.
+- **Recipe:** OKLCH low-chroma earth tones (oat, cream, beige, milk-tea, terracotta, warm-grey, sage, ochre — chroma ~.03–.07); a faint SVG-grain / paper/linen texture; a character serif or humanist sans with real scale contrast; gentle soft shadows over hard flatness. Basically the "expensive" recipe with a warm color story.
+- **When:** the deliberate anti-AI move — brands that want calm + human (wellness, editorial, craft, lifestyle, premium consumer).
+- **Avoid:** beige-on-beige with no contrast/hierarchy (warmth as an excuse to skip the system); one stock terracotta accent with nothing else changed.
 
 ## Glassmorphism
 - **Signature:** frosted translucent panels with a bright edge rim over a colorful backdrop.
@@ -49,11 +59,11 @@ or a deliberate pairing. The meta-rule for all: *execute the system, not the sur
 - **When:** overlays, nav bars, modals, HUD controls over imagery/video. One or two surfaces max.
 - **Avoid:** frosted-purple card on everything, no edge light, glass over a flat color (looks grey).
 
-## Skeuomorphism (modern "rich material")
-- **Signature:** real materials — liquid glass that refracts, specular edge highlights, context-aware legibility (Apple Liquid Glass, Vision Pro).
-- **Recipe:** glass + `inset` specular rims (`inset 0 1px 1px rgba(255,255,255,.6)`) + SVG `feDisplacementMap` refraction + pointer/tilt parallax; always solve contrast.
+## Skeuomorphism (modern) / Liquid Glass
+- **Signature:** real materials — liquid glass that refracts, specular edge highlights, context-aware legibility. Reference: Apple **Liquid Glass** (iOS/iPadOS/macOS 26, WWDC 2025; mandatory for App Store apps Sept 2026).
+- **Recipe:** glass + `inset` specular rims (`inset 0 1px 1px rgba(255,255,255,.6)`) + SVG `feDisplacementMap` refraction + pointer/tilt parallax; always solve contrast. (CSS `backdrop-filter` *cannot* refract — true bending is SVG-filter/WebGL; ship a flat fallback.)
 - **When:** premium consumer OS/app surfaces, media-rich, AR/spatial.
-- **Avoid:** photoreal textures glued everywhere (old slop) OR a flat translucent box with no edge light (new slop).
+- **Avoid:** photoreal textures glued everywhere (old slop) OR a flat translucent box with no edge light (new slop). Note: WWDC 2026 *dialed transparency back* (an opaque↔clear slider, refraction under full-edge sidebars) after legibility complaints — don't over-transparent.
 
 ## Claymorphism
 - **Signature:** puffy toy-like 3D, big rounded corners, pastels, inflated glow.
@@ -78,6 +88,12 @@ or a deliberate pairing. The meta-rule for all: *execute the system, not the sur
 - **Recipe:** `mix-blend-mode` layering; 8–12 fighting hues; type 12px–30vw; `conic-gradient` rainbows; recurring motifs + one anchor element so the eye rests.
 - **When:** fashion, music, art, agencies, youth/culture brands.
 - **Avoid:** "minimalism + 3 bright colors + a sticker"; random emoji decoration. Commit fully.
+
+## Collage / scrapbook / zine
+- **Signature:** layered analog *fragments* with **visible seams** — torn-paper edges, tape strips, handwritten scribbles, sticker/photo cutouts, clashing textures; overlaps and intentional misalignment are the point. Tactile, hand-assembled, nostalgic.
+- **Recipe:** PNG cutouts with real torn/tape edges + slight `rotate()` + `mix-blend-mode` + grain/paper texture; let one motif repeat so it reads composed, not messy. Keep real text in the DOM (don't bake copy into the collage); mind contrast where fragments overlap.
+- **When:** the explicit antidote to soulless AI imagery — fashion microsites, music, culture, brand storytelling (Nike, Spotify). Distinct from brutalism (raw structure) and maximalism (curated color chaos): this is hand-glued.
+- **Avoid:** a few stock tape PNGs scattered on a plain grid with no compositional intent.
 
 ## Anti-design
 - **Signature:** deliberate convention-breaking — default styles, clashing type, broken grids, "wrong" layouts.
@@ -109,6 +125,12 @@ or a deliberate pairing. The meta-rule for all: *execute the system, not the sur
 - **When:** editorial, music/poster, print-heritage, anti-slick texture, image treatments.
 - **Avoid:** flat halftone PNG overlay at low opacity on everything; dithered body text (unreadable).
 
+## Risograph / 2-ink print
+- **Signature:** the imperfect charm of duplicator printing — two flat spot inks (no CMYK), visible **misregistration** (layers offset a hair), grainy halftone fills, and overlaps where the two inks *multiply* into a third tone. Tactile, analog, indie-poster. (Distinct from Dithering/Halftone above, which is a luminance→dot treatment; riso is about 2-ink offset printing.)
+- **Recipe:** pick **exactly 2 ink colors** (classic riso: fluorescent pink `oklch(~0.68 0.27 352)` + federal blue `oklch(~0.52 0.17 250)`); render each "layer" as its own element and `mix-blend-mode: multiply` so overlaps make the third color; nudge the layers ~2–6px apart (`transform: translate`) for misregistration; fill art with a coarse halftone/grain on paper stock `oklch(0.96 0.02 95)`; keep real text crisp in the DOM over the textured art.
+- **When:** music/event posters, zines, indie & culture brands, editorial features, art-school energy.
+- **Avoid:** a flat duotone gradient with no grain/offset (that's just a filter, not riso); misregistering body text (unreadable); using >2 inks (loses the constraint that makes it read as riso).
+
 ## Y2K / Frutiger Aero
 - **Signature:** Y2K = chrome/holographic/blobjects; Frutiger Aero = glossy aqua + bokeh + nature photography, hopeful.
 - **Recipe:** glossy button = high radius + `::before` top-half white→transparent shine + inner glow + grounded drop shadow; gradients behave like *light* (diagonal, with specular highlight). Chrome text = metallic gradient + bevel.
@@ -126,6 +148,12 @@ or a deliberate pairing. The meta-rule for all: *execute the system, not the sur
 - **Recipe:** glitch = duplicate text in `::before/::after` offset cyan/magenta, clip-banded, `steps()` stutter; scanlines = `repeating-linear-gradient(0deg, transparent 0 2px, rgba(0,247,255,.07) 3px 4px)`; `clip-path:polygon()` notched corners.
 - **When:** gaming, dev tools, hacker/security, sci-fi, web3, dramatic heroes.
 - **Avoid:** neon-green Courier + constant glitch loop; scanlines too strong; long-form reading.
+
+## Retro system UI (Win9x / pixel-bevel)
+- **Signature:** 1990s desktop-OS chrome — raised/inset **bevels** on every control, system-grey + teal, pixel/bitmap type, title bars, tiled windows. Nostalgic, "computer-as-appliance," knowingly lo-fi. (Distinct from Y2K/Frutiger Aero's glossy aqua and from Vaporwave's irony — this is sincere desktop chrome.)
+- **Recipe:** silver field `oklch(0.85 0.005 250)` + classic desktop teal `oklch(0.55 0.07 195)`; **bevel via layered shadows** — raised: `box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #808080, inset 2px 2px 0 #dfdfdf, inset -2px -2px 0 #000`; pressed = swap the inset directions; `border-radius: 0`; a pixel face (Silkscreen / W95FA / a bitmap) for chrome + a readable sans for content; hard 1px dividers.
+- **When:** dev tools, indie/games, music, nostalgia/launch microsites — anything knowingly playing the "old computer" card. Pairs with brutalism's flatness.
+- **Avoid:** the bevel kit over modern rounded cards (reads as a bug, not a choice); a pixel font for body copy (illegible); shipping it where users expect a current OS (familiarity + a11y cost).
 
 ## Kinetic typography
 - **Signature:** type performs — char/line reveals, horizontal scroll, weight/width morph, marquees. Type is the hero.

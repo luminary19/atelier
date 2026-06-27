@@ -22,11 +22,14 @@ Run this over the finished build. Fix every miss. A beautiful site isn't done un
 
 ## Accessibility (WCAG 2.2 AA)
 - [ ] **`prefers-reduced-motion` honored in BOTH CSS and JS** (opt-in to motion; reduce, don't remove meaning).
+- [ ] **`prefers-reduced-transparency` / `prefers-contrast` / `forced-colors`** (Windows HCM) don't break
+      layout — glass falls back to solid, focus rings survive, meaningful icons aren't dropped.
 - [ ] No flashing > 3×/sec; auto-motion > 5s has pause/stop/hide; no scroll-jacking; parallax gated + subtle.
 - [ ] Semantic HTML + landmarks + logical heading order (one `h1`); native elements over ARIA; ARIA correct
       where used.
 - [ ] **Visible `:focus-visible` on everything** (no bare `outline: none`); logical tab order; skip link present.
-- [ ] Modals: focus moved in, trapped, `Esc` closes, focus restored (prefer native `<dialog>`); focus never
+- [ ] Modals: focus moved in, trapped, `Esc` closes, focus restored (prefer native `<dialog>` +
+      `showModal()`, `closedby="any"` where supported; no-JS overlays via Popover API); focus never
       obscured by sticky UI.
 - [ ] Interactive **targets ≥ 24×24px** (or spaced); drag actions have a tap/click alternative; auth allows
       paste/password managers.

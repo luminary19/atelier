@@ -102,10 +102,34 @@ directly (shadcn supports any CSS color since the Tailwind-v4 update); set `--ra
 .dark { /* repeat with the dark-mode token values from dark-mode-and-depth.md */ }
 ```
 
+**Newer v4 vars.** Recent shadcn (`new-york-v4`) ships extra semantic groups — add only the ones your UI
+actually uses (all OKLCH, same `:root` + `.dark` pattern); don't bloat the set:
+```css
+:root {
+  /* sidebar block (atelier-components app shell) — shadcn-standard */
+  --sidebar: var(--color-surface);         --sidebar-foreground: var(--color-text);
+  --sidebar-primary: var(--color-primary); --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: var(--color-surface);  --sidebar-accent-foreground: var(--color-text);
+  --sidebar-border: var(--color-border);   --sidebar-ring: var(--color-primary);
+  /* charts — atelier-dataviz reads these (build the palette in color-oklch.md) — shadcn-standard */
+  --chart-1: …; --chart-2: …; --chart-3: …; --chart-4: …; --chart-5: …;
+  /* radius ladder from one --radius — shadcn's MULTIPLICATIVE ladder (don't author each by hand) */
+  --radius-sm: calc(var(--radius) * 0.6);  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);              --radius-xl: calc(var(--radius) * 1.4);
+  /* shadcn also ships --radius-2xl *1.8 / --radius-3xl *2.2 / --radius-4xl *2.6 if you need them */
+  /* OPTIONAL Atelier-custom — NOT shadcn-standard (shadcn's docs *site* uses these names; the CLI doesn't ship them) */
+  --surface: var(--color-surface);         --surface-foreground: var(--color-text);
+  --selection: var(--color-primary);       --selection-foreground: oklch(0.985 0 0);
+  /* add only what your UI uses — don't paste the whole block */
+}
+```
+Also `@import "tw-animate-css";` (the Tailwind-v4 successor to `tailwindcss-animate`) for the animation
+utilities shadcn components expect.
+
 ## Output C — DTCG / W3C design tokens (when a design team / multi-platform pipeline exists)
-Author tokens as JSON (W3C DTCG, stable spec 2025.10), transform with **Style Dictionary v4** → CSS
-vars / SCSS / JS / iOS / Android. Three-tier structure; semantics `$value` reference primitives via
-`{...}`.
+Author tokens as JSON (W3C DTCG, stable spec 2025.10), transform with **Style Dictionary v5**
+(DTCG-2025.10-native by default) → CSS vars / SCSS / JS / iOS / Android. Three-tier structure;
+semantics `$value` reference primitives via `{...}`.
 
 ```json
 {
@@ -129,5 +153,7 @@ theme can consume them). This is the framework-neutral source of truth for cross
   unless the repo says otherwise.
 - Vanilla / non-Tailwind framework → **CSS custom properties** (Output A).
 - Design team or React Native + web → **DTCG + Style Dictionary** (Output C).
+- Distributing the system as **installable themes/blocks** → ship a `registry:theme` / `registry:style` item
+  (**Output D**) — see `atelier-components/references/registry.md`. (A packaging channel, not a new authoring format.)
 Emit **one** source of truth (don't hand-roll a `:root` set *and* an `@theme` block — pick one) and have
 components reference only semantic names.

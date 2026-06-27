@@ -11,7 +11,7 @@ description: >
   this FIRST whenever building a new website, landing page, web app, dashboard, portfolio, or
   editorial site — or deciding the look/feel/aesthetic of one — and ESPECIALLY whenever frontend
   output risks looking generic, templated, or "AI-made." If the user mentions design, UI, a new page,
-  a look/vibe, an aesthetic, or names a reference site, start here. For upgrading or redesigning an
+  a look/vibe, an aesthetic, names a reference site, or wants to see several distinct creative directions to choose from (a moodboard of options), start here. For upgrading or redesigning an
   EXISTING site or app, start with atelier-redesign instead — it audits first, then pulls this skill
   in to set the new direction.
 triggers:
@@ -28,7 +28,8 @@ allowed-tools:
   - WebFetch
   - WebSearch
   - AskUserQuestion
-  - PowerShell  # runs /codex-imagegen's helper to render the single 8-direction moodboard
+  - PowerShell  # runs /codex-imagegen's helper to render the moodboard + crop/regenerate the chosen pane
+  - Agent       # full builds: hand the locked direction + chosen-pane reference to the atelier-director agent
 ---
 
 # Atelier — Art Direction
@@ -38,12 +39,22 @@ generic because the model jumps straight to a default look (purple gradient, cen
 equal cards, Inter + slate-900) instead of deciding *what this specific thing should be*. This skill
 forces that decision first, then hands a crisp brief to the rest of the suite.
 
-> **Suite map.** `atelier-direction` (you are here) → `atelier-foundations` (tokens: color/type-scale/
-> spacing) → `atelier-typography` (the type itself) + `atelier-layout` (structure) → build with
-> `atelier-motion` / `atelier-scroll` / `atelier-webgl` / `atelier-components` → ship through the
-> `atelier-perf-a11y` gate, and for substantial/award builds the adversarial **`atelier-review`**
-> red-team. Run direction first; its **Direction Doc** is the input to everything downstream. Deep
-> reference for everything: `references/fundamentals-deepdive.md`.
+> **Project memory:** if **`ATELIER.md`** exists at the project root, read it first — it carries this
+> project's **register** (brand vs product), interactivity/motion/glassmorphism policy, anti-references,
+> and tokens, and it overrides defaults. Missing on a substantial build? Set one up with **`/atelier init`**.
+> The **`atelier`** router is the suite's hub — it recommends the next step and dispatches to any skill here.
+>
+> **Suite map.** `atelier-direction` (you are here) + **`atelier-ux`** (IA / flows / structure) →
+> `atelier-foundations` (tokens: color/type-scale/spacing) → `atelier-typography` (the type itself) +
+> `atelier-layout` (structure) → build with `atelier-motion` / `atelier-scroll` / `atelier-webgl` /
+> **`atelier-dataviz`** (charts) / `atelier-components`, with **`atelier-copy`** for UX writing → make it
+> production-grade with **`atelier-harden`** (resilience) → ship through the `atelier-perf-a11y` gate, and
+> for substantial/award builds the adversarial **`atelier-review`** red-team. Run direction first (with
+> `atelier-ux` deciding structure in parallel); the **Direction Doc** + **IA + Flow doc** are the inputs to
+> everything downstream. Deep reference for everything:
+> `references/fundamentals-deepdive.md`.
+>
+> **Data — `atelier-data`:** cold-start ideation only — per-product-type recommendations + design reasoning/anti-patterns + a style catalog via `atelier-data` (`scripts/search.py "<industry/product>" --domain product|reasoning|style`). Seeds, not decisions; the direction is decided here.
 
 The whole point: **execute a system, not a surface.** Every "cheap" look is a trick applied without
 a reason; every "expensive" look is a coherent decision carried all the way through. Your job here is
@@ -58,7 +69,10 @@ to make the decision.
 6. **Find the concept** → 7. **Write the Direction Doc** → 8. **Hand off** to foundations/typography/layout.
 
 > If the user takes the 8-direction offer in step 3, their pick already fixes the world + aesthetic +
-> concept, so you skip steps 4–6 and go straight to the Direction Doc (step 7).
+> concept, so you skip steps 4–6, **reconstruct the chosen pane into an image-faithful reference** (crop →
+> image-guided regenerate → deconstruct — see "After the pick" under step 3), then write the Direction Doc
+> (step 7). For a **full build**, step 8 hands the locked direction + that reference to the
+> **`atelier-director`** agent (it does not re-run direction).
 
 Don't skip to code. The Direction Doc is the deliverable of *this* skill.
 
@@ -69,7 +83,11 @@ Don't skip to code. The Direction Doc is the deliverable of *this* skill.
 Infer what the user actually wants before touching anything. Read these signals:
 
 - **Page kind** — marketing/landing (SaaS, consumer, agency, event), web app/dashboard (data-dense,
-  task-first), portfolio/creative (expressive), editorial/content (reading-first).
+  task-first), portfolio/creative (expressive), editorial/content (reading-first). This sets the
+  **register**: *brand* (design IS the product — distinctiveness is the bar) vs *product* (design SERVES
+  the product — earned familiarity is the bar). Record it in `ATELIER.md`; it governs color permission,
+  motion budget, and type drama for every downstream skill. A repo can be mixed (marketing + app) —
+  note per-surface overrides.
 - **Audience** — *the audience picks the aesthetic, not your taste.* A B2B procurement panel, a
   design-conscious consumer, a recruiter scanning a portfolio, and a regulated-industry user want
   opposite things.
@@ -181,7 +199,6 @@ bottom row = routes 5–8). This step is **not optional** once the 8-direction p
    `CREATED:` line — you need it for the next step.
 
    ```powershell
-   # Codex helper, bundled in your Claude skills dir:
    $skills = if ($env:CLAUDE_CONFIG_DIR) { "$env:CLAUDE_CONFIG_DIR\skills" } else { "$env:USERPROFILE\.claude\skills" }
    & "$skills\codex-imagegen\scripts\codex-image.ps1" `
      -Prompt "A 4x2 grid of eight distinct design MOODBOARD tiles — 4 columns, 2 rows — with thin gutters between them. Each tile is a flat-lay collage of: a colour palette, a texture/material swatch, a few letterforms showing the type voice, and one small UI or scene cue; a tiny caption in the tile's corner. Top row left-to-right: '1 — <Name>': <palette + mood + texture + type + motif>; '2 — <Name>': <…>; '3 — <Name>': <…>; '4 — <Name>': <…>. Bottom row left-to-right: '5 — <Name>': <…>; '6 — <Name>': <…>; '7 — <Name>': <…>; '8 — <Name>': <…>. Editorial, art-directed, premium; no paragraphs of body text." `
@@ -221,6 +238,46 @@ folding in any comments they added.
 
 If they say no, continue with steps 4–6 as normal.
 
+### After the pick — reconstruct the chosen pane into an image-faithful reference
+
+The user picked a **visual**, so the build's source of truth is now that pane's *actual look*, not just
+your text recipe. Before the Direction Doc, turn the chosen pane into a clean reference image **plus** a
+deconstructed spec — this is what makes the downstream build faithful to the tile the user actually chose
+(skip this whole block for the take-my-recommendation / no-moodboard paths):
+
+1. **Crop the chosen pane** out of the grid PNG (use the `CREATED:` grid path from the moodboard step):
+   ```powershell
+   $skills = if ($env:CLAUDE_CONFIG_DIR) { "$env:CLAUDE_CONFIG_DIR\skills" } else { "$env:USERPROFILE\.claude\skills" }
+   & "$skills\atelier-direction\scripts\crop-pane.ps1" `
+     -Grid "<abs moodboard grid PNG>" -Pane <N> `
+     -Out "<abs projectRoot>\.atelier\moodboards\chosen-pane.png"
+   ```
+   (Defaults to a 4×2 grid; pass `-Cols`/`-Rows` if the board layout differs. For a blend like *"1 + 3"*,
+   crop the primary pane and note the secondary in the deconstruction.)
+2. **Regenerate it clean + hi-res, anchored to the crop (image-guided — NOT a fresh re-roll).** Pass the
+   crop back in via codex-image.ps1 **`-Edit`** (the verified `-i/--image` reference) *together with* this
+   route's internal recipe, so the output stays faithful to what the user saw while cleaning + upscaling it:
+   ```powershell
+   $skills = if ($env:CLAUDE_CONFIG_DIR) { "$env:CLAUDE_CONFIG_DIR\skills" } else { "$env:USERPROFILE\.claude\skills" }
+   & "$skills\codex-imagegen\scripts\codex-image.ps1" `
+     -Edit "<abs projectRoot>\.atelier\moodboards\chosen-pane.png" `
+     -Prompt "Recreate the attached moodboard tile as a clean, high-resolution, art-directed reference. Faithfully preserve its composition, palette, lighting, texture, and type feel: <this route's recipe, concrete>. Remove any small corner caption. Abstract and premium; no paragraphs of text." `
+     -OutDir "<abs projectRoot>\.atelier\moodboards" -Size 1024x1024
+   ```
+   Rename the result to `chosen-reference.png`. **Fallbacks (never block the direction on image gen) — the
+   canonical `chosen-reference.png` must ALWAYS exist, because every downstream agent looks for that exact
+   name:** if `-Edit` errors / yields no file, or Codex is unavailable, **copy the crop to the canonical name**
+   (`Copy-Item chosen-pane.png chosen-reference.png`) and use that. Never leave the reference named only
+   `chosen-pane.png`.
+3. **Deconstruct the reference — image wins.** `Read` `chosen-reference.png` and extract its *realized*
+   details: palette as **hex / OKLCH**, lighting + material + texture, type character, the signature
+   element / composition, and mood. **Where the image differs from your original text recipe, the image is
+   the source of truth** (the user chose the picture, not the words). These deconstructed details populate
+   the Direction Doc's palette / type / signature-moment fields.
+4. **Record both** under `ATELIER.md` → *Creative direction*: a **Reference image:** line with the absolute
+   `chosen-reference.png` path, plus the deconstructed palette / type / mood. Downstream agents `Read` that
+   image and must stay faithful to it.
+
 ## 4. Pick the world
 
 There are two design worlds with **opposite priorities**. Decide which one you're in — it governs
@@ -241,21 +298,32 @@ you'll spend an award-grade "signature moment."
 
 Pick a **named aesthetic** (or a deliberate blend of two that pair well) as the spine. Don't free-style
 a look — the named aesthetics each have a known recipe and failure mode. Open
-**`references/aesthetics.md`** for all 20 with their exact CSS recipe, signature examples, when-to-use,
+**`references/aesthetics.md`** for all 22 with their exact CSS recipe, signature examples, when-to-use,
 and how to avoid the cheap version.
 
 Quick map (full detail in the reference):
 - **Dark-tech** (Linear/Vercel/Raycast) — default for premium SaaS/dev tools.
 - **Swiss / editorial** — content, portfolios, authority, "clean done right."
-- **Bento + flat/Material** — feature sections, marketing, dashboards.
-- **Glass / liquid / skeuomorphic-material** — premium consumer, OS-like surfaces.
-- **Brutalism / anti-design** — indie, fashion, culture, dev tools with attitude.
+- **Bento + flat/Material 3 Expressive** — feature sections, marketing, dashboards.
+- **Warm / neo-minimalism** — calm-but-human; the 2026 anti-AI move (wellness, craft, lifestyle).
+- **Glass / Liquid Glass / skeuomorphic-material** — premium consumer, OS-like surfaces.
+- **Brutalism / collage / anti-design** — indie, fashion, culture, dev tools with attitude.
 - **Maximalism / Y2K / vaporwave / cyberpunk** — music, gaming, youth, culture brands.
+
+When the brief is "make it feel human, not AI-made," the two named counter-movements are **warm/neo-minimalism**
+and **collage/scrapbook**.
 
 Pairings that read expensive: *Swiss grid + editorial display + grain*; *dark-tech + mesh gradient +
 grain + restrained glass*; *bento + flat + subtle depth*; *kinetic type + liquid + dark-tech*.
 Pairings that clash: glass-everywhere + dark-tech (the slop signature), maximalism + bento,
 neumorphism + anything needing contrast.
+
+### Visual assets — icons, illustration, imagery
+Part of the aesthetic, and a frequent slop source if left to defaults. Decide, as direction: **one icon
+system** (set + style + weight matching the type/radii), **one illustration voice** (or none), and the
+**imagery medium + treatment** (photography vs illustration vs 3-D; duotone/grade/grain/dither to the palette;
+scrims for text-over-image; a designed OG card + real favicon). Full direction guidance in
+**`references/imagery-and-iconography.md`**; `atelier-components` builds them. Capture the call in the Direction Doc.
 
 ## 6. Find the concept
 
@@ -275,21 +343,69 @@ non-arbitrary later (why this type, why this motion, why this color).
   **Design Read** + the 2–3 decisions that matter, inline. No document.
 - **Substantial new build or redesign**: produce the full one-page doc using the template in
   **`references/direction-doc-template.md`** — Design Read, world, aesthetic + pairing, concept +
-  signature moment, palette mood, type voice, motion budget, density, layout archetype, build stack, references,
-  and the anti-slop guardrails for this project. Keep it to one page — it's a brief, not an essay.
+  signature moment, palette mood, type voice, motion budget, density, layout archetype, visual assets
+  (icons/illustration/imagery), build stack, references, and the anti-slop guardrails for this project. Keep
+  it to one page — it's a brief, not an essay.
 
 When in doubt, lean light: a sharp one-liner that the rest of the suite can act on beats a doc nobody
 needed.
 
+**Sync to `ATELIER.md`.** If `ATELIER.md` exists (it will when the `atelier` orchestrator ran `init`
+first), write your load-bearing decisions back into its **Creative direction** section — world,
+aesthetic + pairing, concept + signature moment, palette mood, type voice, layout archetype, visual
+assets — and reconcile **Interactivity** / **Motion policy** with the world you chose. Update in place,
+don't duplicate. The Direction Doc is the working artifact; `ATELIER.md` is the durable brief — they
+must agree.
+
 ## 8. Anti-slop pass + hand off
 
 Before handing off, run the anti-slop check in **`references/anti-slop.md`** against your direction —
-it lists the specific "cheap" tells to avoid and the "expensive" levers to pull. Then hand the
-Direction Doc to:
+it lists the specific "cheap" tells to avoid, the "expensive" levers to pull, and the **two-altitude
+category-reflex check** (don't just dodge the category's default look — dodge the *saturated escape-hatch*
+the category runs to next). Then hand the Direction Doc to:
 - **`atelier-foundations`** — give it the palette mood, type voice, and spacing feel → it emits OKLCH
   tokens, type scale, spacing.
 - **`atelier-typography`** — give it the type voice → font selection, pairing, fluid type, detailing.
 - **`atelier-layout`** — give it the layout archetype → grid, composition, whitespace, responsive.
+
+**Structure runs in parallel:** **`atelier-ux`** turns the same brief into the IA + user-flow map (sitemap,
+nav model, screen states); its artifact pairs with this Direction Doc as the other half of the plan, and
+`atelier-layout` / `atelier-components` consume both.
+
+**Tell the orchestrator which skills this direction warrants.** When invoked from the `atelier` hub, name
+the build/ship set the chosen world + interactivity imply, so it runs exactly those and no more: always
+**`atelier-foundations` → `atelier-typography` + `atelier-layout` → `atelier-components`**; add
+**`atelier-motion`** for interaction feel, **`atelier-scroll`** for scroll choreography, **`atelier-webgl`**
+for a 3D/shader moment, **`atelier-dataviz`** for charts, **`atelier-copy`** for UX writing; then
+**`atelier-harden`** → the **`atelier-perf-a11y`** gate, and **`atelier-review`** for substantial/award
+builds. A restrained production dashboard skips scroll/webgl; an interactive award-grade site includes them.
+
+### Hand off the build to the director (FULL BUILDS ONLY)
+
+**If this run is a full build** — the user wants the site built, not just a direction (the 8-direction
+path was taken and/or the request was "build me a …"), **hand the locked direction straight to the
+`atelier-director` agent** via the **Agent** tool (`subagent_type: "atelier-director"`). Give it a
+self-contained brief (its context is isolated — pass everything by absolute path):
+
+- the resolved absolute **`<projectRoot>`** and the absolute **`ATELIER.md`** path;
+- the **LOCKED direction** (world · aesthetic · concept · signature moment) from the Direction Doc, and the
+  deconstructed **palette (hex) · type · mood**;
+- the absolute path to **`chosen-reference.png`** — instruct the director to treat this image as the
+  **aesthetic source of truth** and thread it to design-lead + build-engineer, and to **NOT re-run the
+  8-direction / direction phase** (a direction already exists);
+- the section pack the chosen world implies.
+
+The director then runs design-lead → build-engineer → ship-reviewer faithful to the reference. **Do not also
+run foundations/typography/layout yourself in this case** — the director owns the build.
+
+**Resilience (if the `Agent` tool isn't available in this skill's context):** do NOT fail or fall back to
+building inline. Instead end with a clear **`DIRECTION LOCKED → launch atelier-director`** handoff block — the
+same self-contained brief + the absolute `chosen-reference.png` path — so the orchestrator (the `atelier`
+router, or the main loop that invoked you) launches `Agent(atelier-director)`. Either way the locked direction
++ the reference reach the director; the only question is who fires the Agent call.
+
+**Direction-only / small requests** (the user just wanted an aesthetic, with no build): skip the director —
+stop at the Direction Doc and hand to foundations / typography / layout as described above.
 
 **Default build stack: Tailwind v4 + shadcn/ui**, unless the project clearly dictates otherwise. Name
 it in the doc so foundations emits Tailwind `@theme` tokens and the build uses shadcn-compatible

@@ -30,12 +30,36 @@ Scale-down-on-leave (sticky-stacking cards), parallax via translate keyframes �
 `view()`/`scroll()`. Use these instead of ScrollTrigger when the effect is simple and you're OK with the
 Firefox fallback.
 
+## CSS scroll-state container queries (NET-NEW, Chrome/Edge 133+ — Chromium-only)
+Style a descendant by its scroller's *scroll state*, no JS, off the main thread. Put
+`container-type: scroll-state` on the scroller, then query inside it. Directly replaces the classic
+shadow-on-stuck-header / snap-styling scroll-listener pattern; no Firefox/Safari → keep an IO fallback.
+```css
+.scroller { container-type: scroll-state; }
+.nav      { position: sticky; top: 0; }
+@container scroll-state(stuck: top)   { .nav { box-shadow: 0 1px 0 var(--border); } }  /* only while stuck */
+@container scroll-state(snapped: x)   { /* style the currently-snapped child */ }
+@container scroll-state(scrollable: top) { /* content remains past edge → show a scroll affordance */ }
+```
+
 ## CSS scroll-snap (sectioned scrolling, accessible)
 ```css
 .snap { scroll-snap-type: y proximity; }      /* proximity is gentler/safer than mandatory */
 .snap > section { scroll-snap-align: start; scroll-padding-top: 4rem; }
 ```
 `scroll-snap-stop: always` forces a stop per item. GPU-free and keyboard-friendly — prefer over JS snapping.
+
+## CSS carousels (NET-NEW, Chrome/Edge 135+ — experimental, fallback required)
+A `scroll-snap` container can grow real prev/next buttons and dot markers with **zero JS** — and because
+they're genuine focusable elements, it's an a11y win over hand-rolled markup. Chromium-only → feature-detect
+and fall back to a JS carousel.
+```css
+.carousel::scroll-button(left)  { content: "‹"; }   /* real focusable buttons, auto-disabled at the ends */
+.carousel::scroll-button(right) { content: "›"; }
+.carousel { scroll-marker-group: after; }
+.carousel li::scroll-marker     { content: ""; }     /* one dot per item */
+.carousel li::scroll-marker:target-current { /* active dot */ }
+```
 
 ## Page / route transitions — View Transitions API
 The browser snapshots old/new DOM and animates between them.
@@ -57,7 +81,14 @@ Support: Chrome/Edge 111+, Firefox 133+, Safari 18+ (Baseline Oct 2025).
 @view-transition { navigation: auto; }
 /* customize via ::view-transition-group/old/new; persistent elements keep a view-transition-name */
 ```
-Support: Chrome/Edge 126+, Safari 18.2+, Firefox 144+. Degrades to normal navigation elsewhere.
+Support: **Chromium + Safari only — NOT Firefox** (Chrome/Edge 126+, Safari 18.2+; Firefox still flagged
+behind `dom.viewTransitions.enabled`, ~82%). Same-origin only; treat Firefox as the no-transition fallback
+(degrades to normal navigation).
+
+### View-Transition types (pick a named animation per transition)
+`document.startViewTransition({ update, types: ["forward"] })` (SPA) or `@view-transition { types: forward }`
+(MPA) + `:active-view-transition-type(forward) { … }` let one transition choose its animation (e.g. forward
+vs back). Cross-browser on the SPA surface since early 2026.
 
 ### Framework notes
 - **Next.js (App Router):** wrap router updates in `startViewTransition` (or use the experimental

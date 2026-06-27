@@ -16,14 +16,20 @@ a safe order, keep changes per-section (reviewable), and preserve everything tha
    visual layout, not information architecture.
 4. **Components (`atelier-components`).** Where you're already touching them, align to the system (shadcn +
    token mapping) for consistency + accessibility. Don't rip out a working component lib wholesale unless a
-   migration was requested.
+   migration was requested. (On a shadcn codebase, `npx shadcn@latest add --diff <component>` previews what
+   upstream changed before you re-pull — drift detection without overwriting your edits.) Modernizing is the moment to swap hand-rolled JS for now-Baseline native
+   primitives — Popover API + Invoker Commands + anchor positioning (tooltips/menus/popovers), native
+   `<dialog>` (modals), `<details name>` (exclusive accordions), `field-sizing: content` (auto-grow inputs):
+   less code, free top-layer/focus/Esc a11y. Keep a fallback where a feature isn't fully cross-engine yet.
 5. **Motion (`atelier-motion`).** Add restrained feedback + reveals (≤300ms, transform/opacity, reduced-
    motion-safe). Remove infinite-loop / excessive motion found in the audit.
 6. **Scroll / WebGL (`atelier-scroll` / `atelier-webgl`).** Only if the new direction earns a signature
    moment. Never as decoration; always with fallbacks.
 
 ## High-ROI / low-risk fixes (do these first, almost always)
-- Replace `#000` + grey text with charcoal + proper-contrast text (OKLCH, elevation-by-lightness in dark).
+- Replace `#000` + grey text with charcoal + proper-contrast text (OKLCH, elevation-by-lightness in dark) —
+  and desaturate the accent on dark (pull chroma down so it doesn't vibrate on charcoal); a saturated accent
+  over `#000` is the #1 vibe-coded dark-theme tell.
 - Default fonts → a real typeface; fix the scale.
 - Add generous macro whitespace; create one clear focal point.
 - One disciplined accent (kill rainbow/everything-colored); 60-30-10.
@@ -44,9 +50,14 @@ a safe order, keep changes per-section (reviewable), and preserve everything tha
   big-bang break.
 
 ## Verify (the gate), then red-team
-Run **`atelier-perf-a11y`**. A redesign isn't done until:
-- Core Web Vitals are **no worse** (ideally better) at p75 — LCP ≤2.5s, CLS ≤0.1, INP ≤200ms.
-- Keyboard + screen-reader pass on every changed flow; contrast ≥ AA; visible focus everywhere.
+Run **`atelier-perf-a11y`** (it owns the full list). A redesign isn't done until:
+- Core Web Vitals are **no worse** (ideally better) at p75 (field/CrUX, not lab) — LCP ≤2.5s, CLS ≤0.1,
+  INP ≤200ms (INP is the most-failed; offscreen sections `content-visibility: auto`, split long tasks with
+  `scheduler.yield()` + a fallback since it's not in Safari).
+- Keyboard + screen-reader pass on every changed flow; contrast ≥ AA; visible `:focus-visible` everywhere;
+  interactive targets ≥24×24px (WCAG 2.2). OS preferences honored — `prefers-reduced-motion`, plus
+  `prefers-contrast` / `prefers-reduced-transparency` / `forced-colors` don't break the new look (glass →
+  solid, focus survives).
 - Functionality + IA + SEO confirmed intact.
 Measurably not worse on the fundamentals, clearly better on the craft = a successful redesign.
 

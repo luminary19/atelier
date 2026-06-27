@@ -21,9 +21,12 @@ the whole point), cards-in-cards-in-cards, random spans with no compositional lo
 overused — earn it with real hierarchy.
 
 ## Masonry / mosaic
-For varied-height content (galleries, feeds). Native CSS masonry (`grid-template-rows: masonry`) is
-still limited in support → for production use a columns approach or JS (or a CSS-grid `grid-auto-flow:
-dense` approximation). Columns version:
+For varied-height content (galleries, feeds). Native CSS masonry settled on **`display: grid-lanes`**
+(reuses grid templating + placement; tune packing with `flow-tolerance`) — **Safari 26.4 shipped it
+first**, Chromium is migrating to it from the older `display: masonry` flag, Firefox is switching too.
+Not Baseline yet, so feature-detect (`@supports (display: grid-lanes)`) and fall back. Native grid-lanes
+preserves **DOM order** (a11y win) unlike most JS masonry libs. Until it's broadly shipped, use a columns
+approach or JS (or a CSS-grid `grid-auto-flow: dense` approximation). Columns version:
 ```css
 .masonry { columns: 3 280px; column-gap: var(--space-5); }
 .masonry > * { break-inside: avoid; margin-bottom: var(--space-5); }

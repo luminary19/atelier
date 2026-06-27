@@ -39,6 +39,13 @@ because the model reached for it, it's a Tell — cut it.
 - [ ] **Anti-center bias** when the direction isn't editorial/manifesto: avoid centered-everything heroes;
       reach for asymmetry/split/broken-grid (governed by the Direction Doc).
 - [ ] **Mobile collapse is explicit** per multi-column section (don't assume the grid "just works").
+- [ ] **No numbered section markers as scaffolding.** `01 / 02 / 03` above every section is the eyebrow
+      trope one tier deeper — reached for because "landing pages do this." Numbers earn their place only
+      when the section genuinely *is* an ordered sequence (a real 3-step process). One deliberate numbered
+      sequence is voice; numbered eyebrows site-wide is AI grammar.
+- [ ] **No side-stripe accent borders.** A `border-left`/`border-right` thicker than 1px used as a colored
+      accent on cards, callouts, or alerts is never intentional — it's the default "make it pop" reflex.
+      Use a full border, a background tint, a leading icon/number, or nothing. (Flagged by `scripts/detect.py`.)
 
 ## Hero discipline (the most-failed section)
 - [ ] **Hero fits the initial viewport** — primary CTA visible without scrolling.
@@ -49,6 +56,10 @@ because the model reached for it, it's a Tell — cut it.
 - [ ] **Top padding not excessive** — hero content shouldn't float halfway down the viewport.
 
 ## CTA & copy Tells
+
+> UX writing is owned by **`atelier-copy`** (errors, labels, empty-state copy, voice/tone); this is the
+> ship-time *tell* check on the rendered words.
+
 - [ ] **CTA text fits one line at desktop** — a wrapping button is broken. 1–3 words for primary CTAs.
 - [ ] **No duplicate CTA intent.** "Get in touch" + "Contact us" + "Let's talk" = one intent → one label,
       used everywhere. Same for signup / view-work intents.
@@ -58,6 +69,9 @@ because the model reached for it, it's a Tell — cut it.
       beats clever-wrong copy.
 - [ ] **No fake-precise numbers.** `92%`, `4.1×`, `13.4 lb`, invented stats — either real (from the
       brief/brand), explicitly labelled mock, or cut. Don't fake precision the brand doesn't claim.
+- [ ] **No AI prose cadence.** Em-dash overuse (the detector flags >6/file), the "Not X. Just Y."
+      aphoristic pivot, triadic "X, Y, and Z" auto-pilot, and buzzword filler (seamless/robust/elevate/
+      empower) are LLM-writing tells. Vary structure; say the specific thing. (Craft: `atelier-copy`.)
 - [ ] **No placeholder-as-label** in forms; labels sit above inputs.
 
 ## Color, shape, theme consistency
@@ -68,7 +82,12 @@ because the model reached for it, it's a Tell — cut it.
 - [ ] **One theme — sections don't invert.** No warm-paper section sandwiched in a dark page (unless a
       deliberate one-time color-block device). Tints within the same family are fine.
 - [ ] **No AI-default palette by reflex:** purple/blue gradient-on-white; or the premium-consumer
-      beige+brass+espresso cliché. Use them only if the brand explicitly calls for it.
+      beige+brass+espresso cliché. Use them only if the brand explicitly calls for it. (The cream/sand/
+      beige body-bg band + its token names are covered at token time in `atelier-foundations` and flagged
+      by `scripts/detect.py`.)
+- [ ] **No ghost cards.** A near-invisible hairline border + a wide, soft, diffuse drop-shadow on a flat
+      white card (the "floating nothing") reads as a generated default. Commit to a real border *or* a real
+      elevation shadow with intent — not a faint both.
 
 ## Asset Tells (→ owned by `atelier-components` "Real assets")
 - [ ] **No div-based fake screenshots.** Hand-built `<div>` "dashboards / task lists / terminal windows /
@@ -89,6 +108,9 @@ because the model reached for it, it's a Tell — cut it.
 ---
 
 > Mechanical where possible: count eyebrows (`uppercase tracking` labels) vs `ceil(sections/3)`; count
-> marquees; count consecutive zigzag rows; grep the build for `<div>`-faked UI previews. Anything over
-> the cap, or any unchecked box, is a draft — not shippable. **Beauty + speed + access + no-tells, or it
-> isn't premium.**
+> marquees; count consecutive zigzag rows; grep the build for `<div>`-faked UI previews. **Run the
+> deterministic detector first** — `python scripts/detect.py <changed files>` (see `detector.md`) — it
+> mechanizes the source-detectable subset of these tells (gradient-text, cream tokens, side-stripe,
+> pure-black/white, glass-default, bounce easing, buzzwords) so this pass can focus on the rendered-output
+> judgments a regex can't make. Anything over the cap, or any unchecked box, is a draft — not shippable.
+> **Beauty + speed + access + no-tells, or it isn't premium.**

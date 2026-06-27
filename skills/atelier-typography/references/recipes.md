@@ -27,6 +27,10 @@ for the hero). A timid scale where everything is near body size is a slop tell.
 ```
 - Tracking inversely with size: large display tighter (−0.02 to −0.04em), small caps/labels looser
   (+0.05 to +0.1em). Leading: body 1.5–1.7, display 0.95–1.1, **always unitless**. Measure 60–75ch.
+- **Line-wrapping:** `h1,h2,h3,.lead { text-wrap: balance; }` (Baseline 2024 — even last lines, no JS
+  balancer); `p { text-wrap: pretty; }` (Chrome/Safari 26, **not Firefox** ~82% — gate with `@supports`).
+  Both degrade to normal wrapping. Optional cap-height align: `text-box: trim-both cap alphabetic`
+  (Chrome 133 + Safari 18.2, not Firefox — progressive enhancement).
 
 ## OpenType — prefer high-level `font-variant-*` (it cascades)
 ```css
@@ -38,6 +42,10 @@ td.num  { font-variant-numeric: tabular-nums slashed-zero; }   /* columns align;
 .recipe { font-variant-numeric: diagonal-fractions; }
 .brand  { font-feature-settings: "ss01" 1, "ss03" 1; }         /* stylistic sets (no high-level prop) */
 ```
+- **Gotcha:** `font-feature-settings` is all-or-nothing — listing one feature *disables the font's
+  defaults* (you can silently lose `liga`/`kern`). Only reach for it for features with no
+  `font-variant-*` longhand (stylistic sets `ss01–ss20`, character variants `cv01`); re-add
+  `"liga" 1, "kern" 1` if you must hand-roll the string.
 Tags: `liga` common, `dlig` discretionary (display only), `tnum/pnum`, `onum/lnum`, `zero`, `frac`,
 `smcp/c2sc`, `ss01–ss20`, `kern`, `opsz`. Tabular figures in any data table/dashboard is a quiet
 quality signal.
@@ -65,6 +73,40 @@ h1    { --wght: 720; }
   axis on one element (`font-variation-settings:"opsz"` overrides `font-optical-sizing:auto`).
 - Animate axes for hover/scroll effects (see `kinetic-and-editorial.md`); keep to `wght/wdth/opsz` and
   respect `prefers-reduced-motion`.
+
+## Fallback-font metric matching (kill the swap shift)
+`font-display: swap` shows a fallback first, then swaps — and if the fallback's metrics differ, the swap
+*reflows* (a top CLS/LCP cause on big display type). Match the fallback's box to the web font so the swap
+is invisible: override the metrics on a named local fallback, then list it right after the web font.
+```css
+@font-face {
+  font-family: "Satoshi-fallback";
+  src: local("Arial");
+  size-adjust: 97%;        /* scale glyphs so x-height/advance match the web font */
+  ascent-override: 92%;    /* lock the line box so vertical rhythm doesn't jump on swap */
+  descent-override: 24%;
+  line-gap-override: 0%;
+}
+:root { font-family: "Satoshi", "Satoshi-fallback", sans-serif; }
+```
+- Get the numbers automatically: **Fontaine** (`@capsizecss/...` / `fontaine`) or Next.js **`next/font`**
+  (does this for you), or the *Automatic Font Matching* tool. Tune `size-adjust` until the swap is imperceptible.
+- `font-display: optional` sidesteps the swap entirely (keeps the fallback for the first load if the font
+  isn't ready) — best CLS, at the cost of a possible flash of fallback. Use `optional` for body, the matched
+  `swap` for display you can't afford to flash. (The CLS/LCP gate is `atelier-perf-a11y`.)
+
+## International type — RTL, non-Latin, expansion
+A "premium" Latin setting that breaks in German or Arabic isn't premium. Three things to build in:
+- **Text expansion:** translations run longer — German ~+35%, Russian ~+20%. Never fix a button/label
+  width to the English string; size to content (`width: max-content`, sensible `min-width`) and allow wrap.
+  Re-check that the type scale and `measure` still hold at +35%.
+- **RTL (Arabic/Hebrew):** drive direction from `<html dir>` and use **logical properties everywhere**
+  (`margin-inline-start`, `padding-inline`, `text-align: start`, `inset-inline`) so the layout mirrors for
+  free — never `margin-left`. Obliques don't apply to Arabic; mirror direction-implying icons (arrows, chevrons).
+- **Script-aware font stacks:** your display face likely has no Arabic/CJK/Devanagari glyphs — declare a
+  per-script fallback (`unicode-range` `@font-face`, or a stack ending in a quality `Noto Sans <Script>`) so
+  non-Latin text doesn't drop to ugly defaults. CJK has *no word spaces* and huge files — subset hard and
+  set a higher `line-height` (~1.7). (Logical-property + RTL gate → `atelier-perf-a11y`.)
 
 ## Anti-slop type checklist
 1–2 families · a font with a point of view (not a default) · ratio ≥1.25 with real H1↔body contrast ·

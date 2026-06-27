@@ -34,11 +34,18 @@ Upgrading existing work is different from greenfield: you must **add system with
 The failure mode is "piling on more effects." The fix is the opposite — diagnose what *system* is missing,
 add it, and remove the tricks. Audit before you touch anything.
 
-> **Uses the whole suite:** `atelier-direction` (anti-slop lens), `atelier-foundations` (tokens),
-> `atelier-typography`, `atelier-layout`, `atelier-motion`, `atelier-components`, `atelier-scroll`/
-> `atelier-webgl` (only if earned), gated by `atelier-perf-a11y` and — for a substantial redesign —
-> red-teamed by `atelier-review` (a redesign is the canonical "substantial build" case). Deep reference:
-> `references/fundamentals-deepdive.md` (§15). **Supersedes** the older `redesign-existing-projects` skill.
+> **Project memory:** if **`ATELIER.md`** exists, read it first; if not, this skill's audit (step 1) is
+> the natural place to *write* one — capture the existing register, brand, and tokens so the upgrade stays
+> on-brief. The **`atelier`** router (`/atelier init`) owns that file.
+>
+> **Uses the whole suite:** `atelier-direction` (anti-slop lens) + `atelier-ux` (IA/flows audit),
+> `atelier-foundations` (tokens), `atelier-typography`, `atelier-layout`, `atelier-motion`,
+> `atelier-components`, `atelier-copy` (UX writing), `atelier-dataviz` (if data-heavy),
+> `atelier-scroll`/`atelier-webgl` (only if earned), made production-grade by `atelier-harden`, gated by
+> `atelier-perf-a11y` and — for a substantial redesign — red-teamed by `atelier-review` (a redesign is the
+> canonical "substantial build" case). **Tonal nudges (bolder / quieter / distill) live here too** —
+> `references/tonal-dials.md`. Deep reference:
+> `references/fundamentals-deepdive.md` (§15).
 
 ---
 
@@ -72,8 +79,15 @@ type, color tokens (OKLCH), one accent, grain, killing the slop combos.** Surfac
 ## 4. Re-direct
 
 Produce a (scaled) Direction Doc via `atelier-direction` for the target state — but **anchored to the
-existing brand** (preserve logo/equity/recognizable color where it works). Decide the world and the one or
-two signature improvements. Don't impose an unrelated aesthetic on an established brand.
+existing brand** (preserve logo/equity/recognizable color where it works). **Identity preservation wins:**
+if the project has committed brand tokens/colors, build *around* them — don't regenerate a palette over a
+real brand (same rule `atelier-foundations` follows). Decide the world and the one or two signature
+improvements. Don't impose an unrelated aesthetic on an established brand. **If the design is technically
+fine but tonally off** — too safe, too loud, or too complex — reach for the matching dial in
+`references/tonal-dials.md` (bolder / quieter / distill) instead of a full re-direct. When the brief is
+"make it feel human, not AI-made," the 2026 counter-movements are the upgrade direction: **warm/neo-
+minimalism** (keep the restraint, add earthy low-chroma OKLCH + texture + a character serif) or **collage/
+scrapbook** (hand-assembled tactile fragments) — not more of the same flat-minimal AI look.
 
 ## 5. Upgrade in safe order (system first, tricks last)
 
@@ -83,6 +97,13 @@ Playbook in **`references/upgrade-playbook.md`**. The order that adds the most w
 2. **Typography** — escape default fonts, fix scale/leading/measure.
 3. **Layout & whitespace** — add macro whitespace, fix hierarchy/focal point, real grid; don't reflow IA.
 4. **Components** — align to the system (shadcn + token mapping) where you're already touching them.
+   Modernizing is also the moment to retire hand-rolled JS for native primitives (most now Baseline): Popover
+   API + Invoker Commands (`command`/`commandfor`) + anchor positioning for tooltips/menus/popovers, native
+   `<dialog>` for modals, `<details name>` for exclusive accordions, `field-sizing: content` for auto-grow
+   inputs — less code, free a11y. `<details name>`, `<dialog>`, Popover API + anchor positioning are Baseline;
+   Invoker Commands reached Baseline only Dec 2025–Jan 2026 and `field-sizing: content` is in all three engines
+   but NOT yet Baseline (~79%, Firefox 152 / Jun 2026) — keep the JS fallback for those two where pre-152
+   Firefox / older Safari matter.
 5. **Motion** — add restrained feedback/reveals; respect reduced motion.
 6. **Scroll/WebGL** — only if the new direction earns a signature moment; never as decoration.
 7. **Imagery** — replace dated / stock / placeholder / low-res images with assets generated on the *new*
@@ -95,8 +116,11 @@ Remove the slop tricks as you go. Keep changes reviewable (per-section, not one 
 
 - **Don't break functionality, IA, SEO, or accessibility** — preserve URLs, headings/structure, alt text,
   ARIA, keyboard flows, form behavior. A prettier site that regresses these is a failure.
-- Run the **`atelier-perf-a11y`** gate. Compare before/after on Core Web Vitals (a redesign that tanks LCP/
-  INP is a loss). Spot-check keyboard + screen reader on changed flows.
+- **Harden the changed surfaces** (`atelier-harden`) — re-check real/empty/long data, text overflow,
+  i18n/RTL, and error states on anything you restyled; a redesign often breaks these even when it looks better.
+- Run the **`atelier-perf-a11y`** gate (its `scripts/detect.py` is a fast first pass on the changed files).
+  Compare before/after on Core Web Vitals (a redesign that tanks LCP/INP is a loss). Spot-check keyboard +
+  screen reader on changed flows.
 
 ## 7. Adversarial review (substantial redesigns)
 

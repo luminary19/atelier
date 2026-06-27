@@ -58,17 +58,27 @@ Optionally verify current library/API facts via Context7 / web if available; oth
 Audit WCAG 2.2 AA: contrast of text/accent/muted in EVERY theme (compute it, don't trust tokens — the
 accent-as-text on a light background is the classic fail); focus-visible on every control incl. on accent
 fills; full keyboard operability (loaders skippable + non-trapping, pinned/horizontal sections not traps);
-landmarks + one h1 + heading order; reduced-motion gated on EVERY motion path; target size >=24px;
-canvas/WebGL aria-hidden WITH a real DOM text alternative; auto-motion >5s has a pause control; color never
-the only signal; alt text correct.
+semantic HTML first — flag <div>/<span> acting as buttons/links/dialogs where a native <button>/<a href>/
+<dialog>/<details name> belongs, no overridden implicit roles, every interactive element has an accessible
+name; landmarks + one h1 + heading order; reduced-motion gated on EVERY motion path; prefers-reduced-
+transparency honored (backdrop-filter/translucent glass falls back to a solid fill); forced-colors: active
+(Windows HCM) doesn't break it — system-color keywords, focus outline kept, meaningful icons not dropped,
+icon-only buttons survive; prefers-contrast: more thickens borders/text; target size >=24px (2.5.8); focus
+never fully obscured by sticky header/footer/cookie bar (2.4.11 — scroll-margin/scroll-padding); every drag
+interaction (slider/reorder/kanban/map) has a single-pointer tap/click alternative (2.5.7); auth fields
+allow paste + password managers, no cognitive-test gate (3.3.8); canvas/WebGL aria-hidden WITH a real DOM
+text alternative; auto-motion >5s has a pause control; color never the only signal; alt text correct.
 ```
 
 **PERF** — rubric `atelier-perf-a11y/references/performance.md` + `atelier-perf-a11y/references/preflight-checklist.md`
 ```
-Audit Core Web Vitals: is the LCP element (usually hero text/image) eager + preloaded, not behind a lazy
-import; CLS from font swap on big display type (metric-matched fallback?) and from un-reserved media /
-late-injected content; INP — passive listeners, rAF-throttled, will-change scoped + released,
-content-visibility not breaking scroll-trigger measurement; compositor-only animation; heavy/3D lazy +
+Audit Core Web Vitals against the field/p75 gate — LCP <=2.5s, CLS <=0.1, INP <=200ms: is the LCP element
+(usually hero text/image) eager + preloaded, not behind a lazy import; CLS from font swap on big display
+type (metric-matched fallback?) and from un-reserved media / late-injected content; INP — passive listeners,
+rAF-throttled, will-change scoped + released, long tasks (>50ms) split with scheduler.yield() AND a
+setTimeout(0)/timing fallback kept (scheduler.yield is Chrome+FF only, NOT Safari), yielding AFTER the
+visible response is painted, content-visibility not breaking scroll-trigger measurement; compositor-only
+animation; heavy/3D lazy +
 DPR-capped + paused offscreen/hidden; image format/size; SRI on CDN scripts (hardening).
 ```
 

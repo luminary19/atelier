@@ -76,7 +76,6 @@ If preflight fails:
 Call the helper. **Always prefer the script over a raw `codex exec`.**
 
 ```powershell
-# Resolve your Claude skills dir (this skill lives under it):
 $skills = if ($env:CLAUDE_CONFIG_DIR) { "$env:CLAUDE_CONFIG_DIR\skills" } else { "$env:USERPROFILE\.claude\skills" }
 & "$skills\codex-imagegen\scripts\codex-image.ps1" `
     -Prompt "A cozy alpine cabin at dawn, soft volumetric light, photographic" `

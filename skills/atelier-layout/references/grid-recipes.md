@@ -73,6 +73,26 @@ Container query units: `cqw`, `cqi` (inline), `cqmin`. Use for anything reused i
 stops flex/grid children with intrinsic min-width from blowing out the track. `clamp()` for fluid track
 sizes and gaps.
 
+## Form layout (a first-class archetype)
+Forms are a layout problem before a validation one (validation logic → `atelier-components` rhf+zod;
+target-size/focus a11y → `atelier-perf-a11y`; multi-step *flow* → `atelier-ux`). The structure that reads considered:
+- **One column by default.** Multi-column forms break the vertical scan and the tab order; reserve two
+  columns for genuinely paired fields (city/zip, first/last) via a nested grid that collapses to one:
+  ```css
+  .form  { display: grid; gap: var(--space-4); max-width: 40rem; }       /* ~a form's worth of measure */
+  .field { display: grid; gap: var(--space-1); }                         /* label · control · help/error */
+  .row-2 { display: grid; gap: var(--space-4);
+           grid-template-columns: repeat(auto-fit, minmax(min(220px,100%), 1fr)); } /* pairs → 1 col on narrow */
+  ```
+- **Labels above the control** — fastest to scan, no width guessing, RTL-safe, best on mobile. Inline labels
+  only for dense settings rows in a stable language.
+- **Group with `<fieldset>`/`<legend>`** (semantic grouping = free a11y) and section headings; group with
+  proximity/whitespace, not boxes.
+- **Reserve the message row** so showing an error doesn't shift layout (`min-height` on the help/error line);
+  every control ≥ the 24×24 target; vertical rhythm on the spacing scale.
+- **Actions:** one primary (left-aligned to the form, or full-width on mobile) at the bottom; rest
+  secondary/ghost. Sticky action bar for long or multi-step forms.
+
 ## Flexbox where it belongs
 ```css
 .toolbar { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }

@@ -48,17 +48,32 @@ if (!reduce) {
 }
 ```
 
-### Line reveal (masked stagger)
+### Line reveal (masked stagger) — modern `SplitText.create()` API
+SplitText was rewritten when GSAP went fully free; prefer `SplitText.create()` (built-in masking, a11y,
+and responsive re-splitting) over the old `new SplitText()` constructor + a manual `overflow:hidden` wrapper.
 ```js
-const split = new SplitText(".headline", { type: "lines", linesClass: "line" });
-// CSS: .headline .line { overflow: hidden; } .headline .line > * { display:block; }
-if (!reduce) {
-  gsap.from(split.lines, {
-    yPercent: 100, opacity: 0, duration: 0.9, ease: "power4.out", stagger: 0.06,
-    scrollTrigger: { trigger: ".headline", start: "top 80%" },
+// Split only AFTER fonts load — otherwise lines re-flow and the split is wrong:
+document.fonts.ready.then(() => {
+  SplitText.create(".headline", {
+    type: "lines",
+    mask: "lines",        // wraps each line in an overflow-clip mask — no manual .line CSS needed
+    aria: "auto",         // a11y: aria-label on the parent + aria-hidden on the split units
+    autoSplit: true,      // re-split on resize / font swap…
+    onSplit: (self) => {  // …and re-run the reveal each time (the returned tween → auto cleanup + time-sync)
+      if (reduce) return; // reduced-motion: leave text visible, no animation
+      return gsap.from(self.lines, {
+        yPercent: 100, opacity: 0, duration: 0.9, ease: "power4.out", stagger: 0.06,
+        scrollTrigger: { trigger: ".headline", start: "top 80%" },
+      });
+    },
   });
-} // reduced-motion: leave text as-is (already visible)
+});
+/* CSS: .headline { font-kerning: none; text-rendering: optimizeSpeed; }  ← avoids per-char kerning shift.
+   Don't combine SplitText with `text-wrap: balance` — the re-wrap fights the split. */
 ```
+`aria:"auto"` is the key a11y win: without it, splitting a headline into per-line/char spans makes a
+screen reader read it letter-by-letter. The old `new SplitText(...)` constructor still works, but you own
+masking, re-splitting on resize, and aria yourself — `create()` does all three.
 
 ### Horizontal scroll section (vertical drives horizontal)
 ```js

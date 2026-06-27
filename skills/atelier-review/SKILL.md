@@ -41,16 +41,25 @@ real browser**, then applies fixes and re-checks. It is the structured, repeatab
 multi-agent audit — **without** needing ultracode: it orchestrates ordinary subagents (the `Task` tool),
 which are always available.
 
+> **Project memory:** if **`ATELIER.md`** exists, read it first — the DESIGN reviewer checks fidelity to
+> its register, policies, and anti-references (not just the Direction Doc). Set up via **`/atelier init`**.
+>
 > **Inputs:** a built, runnable site/app + the **Direction Doc** (to check fidelity, via `atelier-direction`).
 > **Rubrics it reviews against** (cite cross-skill refs fully-qualified): `atelier-perf-a11y/references/
-> preflight-checklist.md`, `…/anti-slop-preflight.md`, `…/accessibility.md`, `…/performance.md`, plus the
-> domain refs under `atelier-motion`, `atelier-scroll`, `atelier-webgl`, `atelier-typography`,
-> `atelier-layout`, `atelier-foundations`. Reviewer + verifier prompt templates and the findings contract:
+> preflight-checklist.md`, `…/anti-slop-preflight.md`, `…/accessibility.md`, `…/performance.md`, `…/detector.md`
+> (the deterministic pre-pass), plus the domain refs under `atelier-motion`, `atelier-scroll`,
+> `atelier-webgl`, `atelier-typography`, `atelier-layout`, `atelier-foundations`, `atelier-dataviz`,
+> `atelier-ux`, `atelier-copy` (UX-writing rubric), and `atelier-harden` (resilience checklist). Reviewer +
+> verifier prompt templates and the findings contract:
 > **`references/reviewer-prompts.md`** (this skill's own ref). Live in-browser playbook:
 > **`references/live-verification.md`** (this skill's own ref).
+>
+> **Supplementary data — `atelier-data`:** the DESIGN / A11Y reviewers may also consult its web UX heuristic list (`atelier-data/scripts/search.py "<topic>" --domain ux`) as a *breadth* prompt to catch overlooked patterns. It is curated-opinion, **not** a compliance source — the `atelier-perf-a11y` rubrics above remain authoritative.
 
 ## Where this sits — the quality ladder
-Three layers, escalating rigor — **same rubrics throughout**, just re-checked with more independence:
+Four layers, escalating rigor — **same rubrics throughout**, just re-checked with more independence:
+0. **deterministic detector** (`atelier-perf-a11y/scripts/detect.py`) — a fast regex-tier pre-pass on
+   source. Run it before everything else and feed its hits in as leads. Every build (seconds).
 1. **perf-a11y self-checklist** (`atelier-perf-a11y/references/preflight-checklist.md`) — Core Web Vitals +
    WCAG 2.2 AA. Every build.
 2. **anti-slop self-checklist** (`atelier-perf-a11y/references/anti-slop-preflight.md`) — the "AI Tells"
@@ -58,29 +67,41 @@ Three layers, escalating rigor — **same rubrics throughout**, just re-checked 
 3. **this skill — adversarial** — independent reviewers per dimension + refutation + live browser
    verification. Substantial / redesign / award builds.
 
-Layers 1–2 are you checking your own work; **this** is independent reviewers trying to break it. So:
+Layers 0–2 are you checking your own work; **this** is independent reviewers trying to break it. So:
 - **Quick build / single component** → just the layer-1/2 self-checklists. Don't over-process.
 - **Substantial build, redesign, or award-grade work** → run **this**; it assumes the builder (you) missed
   things and pays independent reviewers to find them.
 
 ## The dimensions (one reviewer each — scale to the task)
 - **A11Y** — WCAG 2.2 AA: contrast in *every* theme, focus-visible, keyboard, landmarks/heading order,
-  reduced-motion completeness, target size, canvas/WebGL text alternative, marquee pause.
-- **PERF** — Core Web Vitals: LCP/CLS/INP, lazy/`will-change`/`content-visibility`, font + asset
-  strategy, compositor-only animation, offscreen pausing.
+  reduced-motion completeness, target size, canvas/WebGL + chart text/table alternative, marquee pause.
+- **PERF** — Core Web Vitals (field/p75 gate: LCP ≤2.5s, CLS ≤0.1, INP ≤200ms), lazy/`will-change`/
+  `content-visibility`, font + asset strategy, compositor-only animation, offscreen pausing.
 - **MOTION** — every motion path traced incl. the *reduced* path; breakpoint gates match the CSS; pin/
   scrub/marquee/cursor correctness; dispose/cleanup; cross-browser (svh, blend modes, oklch, iOS).
-- **DESIGN** — anti-slop Tells (`anti-slop-preflight.md`) + **fidelity to the Direction Doc** (world,
-  concept, signature moment, one-accent/theme/radius discipline) + light/dark correctness + polish +
-  **placeholder / fake / missing imagery** (div-fakes, gradient-blob heroes, stock-looking filler).
+- **DESIGN** — anti-slop Tells (`anti-slop-preflight.md`) + **fidelity to the Direction Doc and
+  `ATELIER.md`** (register, world, concept, signature moment, one-accent/theme/radius discipline,
+  interactivity/glass policy, anti-references) + light/dark correctness + polish + **placeholder / fake /
+  missing imagery** (div-fakes, gradient-blob heroes, stock-looking filler) + chart honesty/clutter
+  (`atelier-dataviz`) + IA/flow coherence and missing screen-states (`atelier-ux`). Run a **5-persona pass**
+  (power user · first-timer · screen-reader user · mobile user · stress-tester), naming the element-level
+  failure each one hits.
 - **CODE/COPY** (add when the build is large) — dead/duplicate code, contract drift, broken/AI-cute copy,
-  fake-precise numbers.
+  fake-precise numbers. Judge copy against **`atelier-copy`**: errors say what happened + why + how to fix;
+  labels verb-first; no duplicate CTA intents; no buzzword filler; placeholders aren't labels.
+- **RESILIENCE** (add for production apps) — exercise the non-happy paths against **`atelier-harden`**: text
+  overflow at every breakpoint, long / empty / huge data, per-status error states, offline / timeout,
+  i18n / RTL + locale formatting, double-submit + cleanup. A demo-data happy-path build fails this even when
+  it looks finished.
 
 ## The flow
 
 1. **Boot & scope.** Identify the build's files and how to run it. Start it (a no-cache static server for
    vanilla; the dev server otherwise). Load it once — **console errors/warnings are findings**. List the
-   files each reviewer needs.
+   files each reviewer needs. **Run the deterministic detector first** —
+   `python atelier-perf-a11y/scripts/detect.py --json <built/changed files>` — and hand its hits to the
+   DESIGN + A11Y reviewers as *leads to verify live*, not automatic findings (it's regex-tier; it can't see
+   rendered geometry or real contrast).
 2. **Fan-out review (parallel, READ-ONLY).** Spawn one subagent per dimension *in a single message* so
    they run concurrently. Each is a **hostile specialist** — "assume this build is flawed; find the real
    problems" — reads its files + the matching Atelier rubric, and returns findings in the fixed contract
@@ -99,8 +120,13 @@ Layers 1–2 are you checking your own work; **this** is independent reviewers t
    emulate `prefers-reduced-motion`; tab through with the keyboard; and **compute contrast from rendered
    pixels** (don't trust a token value or a string). Confirm/refute findings here. (Playbook:
    `references/live-verification.md`.)
-5. **Synthesize.** Merge static + live + verdicts, dedupe, drop refuted, sort by severity
-   (blocker → high → medium → low). State the verdict per dimension: ship-ready or not.
+5. **Synthesize + score.** Merge static + live + verdicts, dedupe, drop refuted. Tag each surviving finding
+   **P0–P3** (P0 = blocker / ship-stopper · P1 = high · P2 = medium · P3 = low) and sort by it. State a
+   **per-dimension verdict** (ship-ready · ship-with-risks · blocked) and an overall **ship-readiness** call
+   with the P-counts (e.g. "blocked — 2×P0, 5×P1"). **Persist a snapshot** to `.atelier/review-snapshot.md`:
+   the date, overall verdict, P0–P3 counts, and the open findings grouped by dimension. A re-run reads the
+   last snapshot as its backlog and reports the trend (P-counts down = the fixes landed) — so the loop in
+   step 7 is measurable, not vibes.
 6. **Apply — serially, in the main thread.** Fix the surviving findings yourself, one coherent pass. **Do
    NOT fan out the fixes** — parallel edits to shared files (one CSS, one HTML) collide. Reviewers fan out;
    fixes do not. Asset findings (placeholder / fake / missing imagery) are remediated here by generating

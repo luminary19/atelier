@@ -21,6 +21,8 @@ document.querySelectorAll(".magnetic").forEach((el) => {
   el.addEventListener("pointerleave", () => { xTo(0); yTo(0); });
 });
 ```
+Already on Motion? **Motion+ `Cursor`** (magnetic / zoning / morph-to-target follower) ships this off the
+shelf — buy-vs-build it instead of hand-rolling.
 
 ## Custom cursor (lerped follower)
 Hide the native cursor, render a follower that lags toward the pointer; grow/label on interactive hover.
@@ -59,7 +61,10 @@ CSS-only, seamless (duplicate the content once so a -50% translate wraps cleanly
 ```
 `aria-hidden` the duplicate so screen readers don't read it twice. GSAP version (for velocity tied to
 scroll, drag, variable-width items): `gsap.to(track, { xPercent: -50, repeat: -1, duration, ease: "none" })`
-and modulate `timeScale` by scroll velocity.
+and modulate `timeScale` by scroll velocity. Or **Motion+ `Ticker`** — an infinite marquee that fixes the
+CSS-marquee seam/gotchas (drag, velocity coupling) if you're already on Motion.
+Auto-motion running >5s must be pausable (WCAG 2.2.2) — hover-pause only covers pointer users, so also
+provide a keyboard/touch-reachable pause control (or stop entirely under reduced motion).
 
 ## WebGL hover / image distortion → atelier-webgl
 Shader-based ripple/liquid/bulge distortion on images (flowmap, displacement) lives in **`atelier-webgl`**

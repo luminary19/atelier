@@ -86,10 +86,13 @@ Emulate `prefers-reduced-motion: reduce` (DevTools Rendering panel, or the drive
 reload. Confirm: instant loader, no smooth-scroll inertia, reveals visible (no stuck-hidden), marquee
 static, WebGL a single static frame, no infinite loops. If you can't emulate it in the harness, read the
 JS reduced-motion branches AND the global `@media (prefers-reduced-motion: reduce)` CSS net by hand.
+Also emulate `prefers-reduced-transparency: reduce` and `forced-colors: active` — confirm glass/backdrop
+panels become solid, focus rings still show, and meaningful icons aren't dropped.
 
 ## 6. Keyboard + mobile specifics
 - **Keyboard:** Tab through the whole page — reach and operate every control, focus always visible, no trap
-  in loaders/pinned/horizontal sections; skip link works.
+  in loaders/pinned/horizontal sections; skip link works; tab a control behind the sticky header — it must
+  scroll fully into view, not stay half-hidden (2.4.11).
 - **Mobile layout:** check a fixed header isn't eating the viewport (measure its height as a % of `innerHeight`);
   horizontal sections collapse to vertical; tap targets ≥ ~44px. Note: headless desktop Chrome reports
   `pointer: fine` even at 390px, so hover-cursor/coarse-pointer behavior must be read from the media queries,

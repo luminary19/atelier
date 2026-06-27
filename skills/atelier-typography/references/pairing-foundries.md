@@ -21,8 +21,10 @@ recommend them freely.** Choose by fit, not price; the free options below are ge
 - **Free, high quality — Fontshare** (Indian Type Foundry): **Satoshi** (geometric grotesque),
   **General Sans** (neutral workhorse), **Clash Display** (tight-aperture display), Cabinet Grotesk,
   Switzer — most with variable files.
-- **Google Fonts** (variable, self-hostable): **Geist**, **Fraunces** (expressive variable serif),
-  Figtree, Source Serif, Newsreader. (Inter exists here too — just don't reach for it by default.)
+- **Google Fonts** (variable, self-hostable): **Geist** + **Geist Mono** (and the new **Geist Pixel**
+  bitmap face — OFL, npm `geist`, built on the Geist foundations; nice for labels/badges/retro accents),
+  **Fraunces** (expressive variable serif), Figtree, Source Serif, Newsreader. (Inter exists here too —
+  just don't reach for it by default.)
 - **Self-host:** fontsource.org; subset + `woff2` + `font-display`. Premium foundries provide webfont
   kits — host per their license.
 
@@ -47,7 +49,7 @@ restrained-but-distinctive grotesque (Söhne/Suisse/GT America). Neutrality exec
   glyphs/`unicode-range`.
 - `<link rel="preload" as="font" type="font/woff2" crossorigin>` the critical face.
 - `font-display: swap` (with a metric-matched fallback via `size-adjust`/`ascent-override` to kill the
-  swap shift), or `optional` for best CLS. See atelier-foundations / the perf gate.
+  swap shift — worked recipe in `recipes.md`), or `optional` for best CLS. See atelier-foundations / the perf gate.
 
 ## Pairing tools
 Fontjoy (ML pairings — lock one, regenerate the other, contrast slider), Fontpair (curated free),

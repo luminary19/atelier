@@ -2,7 +2,9 @@
 
 ## Dark mode as a semantic remap
 Don't build a second palette — remap the semantic tokens. This is why the three-tier architecture
-matters.
+matters. Two ways to author the remap: a `[data-theme="dark"]` (or `.dark`) block as below, or inline
+per-token with **`light-dark(<light>, <dark>)`** (Baseline; set `color-scheme: light dark` on `:root`)
+so each token follows the theme toggle with no media query. Either way the dark rules below hold.
 
 ```css
 [data-theme="dark"] {
@@ -29,6 +31,23 @@ matters.
 - **Text:** off-white (~`L 0.92`), muted ~`L 0.70`. Keep ≥4.5:1; verify with **APCA** (it's far more
   accurate than WCAG 2 ratios on dark — WCAG 2 wrongly passes muddy near-black pairs).
 - **Borders:** translucent white hairlines read cleaner than solid grays.
+
+## Beyond dark mode — multi-theme from one token layer
+Dark mode is just the first *remap*. The same tier-2 semantic layer gives you any number of themes — the
+rule never changes: **components read semantics; a theme is a block that re-points them.**
+- **Multiple brands / sub-brands:** one `[data-brand="x"]` block per brand re-pointing `--primary` /
+  `--ring` / neutrals (and maybe `--radius`). Components don't change.
+- **High-contrast theme (first-class, not an afterthought):** a `[data-theme="hc"]` (or `@media
+  (prefers-contrast: more)`) variant that thickens borders, drops low-contrast greys, and pushes text to
+  ramp step 12. Honor `forced-colors: active` (Windows HCM) *separately* — there you cede color to the OS
+  (`system-color` keywords), not restyle. (Both gated by `atelier-perf-a11y`.)
+- **User-customizable accent:** expose ONE hue knob, derive the rest. Take `--brand-h` from the user, build
+  `--primary: oklch(0.60 0.16 var(--brand-h))`, and let `oklch(from …)` / `color-mix()` generate every
+  state — one slider re-themes the whole app with guaranteed-even ramps. Pair with
+  `contrast-color(var(--primary))` for readable button text on any chosen hue.
+
+Author with `light-dark()` for the light/dark axis and data-attributes for the brand/contrast axes; the two
+compose. One source of truth per token — never fork a component per theme.
 
 ## Translucent elevation overlay (compounds when nested)
 ```css
@@ -70,3 +89,10 @@ asset), tiles seamlessly, scalable. Keep it a whisper.
 ```
 Interpolate multi-stop gradients in OKLCH for clean midpoints: `linear-gradient(in oklch, A, B)`
 (`in oklch longer hue` for rainbow sweeps).
+
+- **Animate gradients with `@property`, not JS.** Plain `--vars` parse as strings and can't
+  interpolate; register a type to animate them: `@property --angle { syntax:"<angle>"; inherits:false;
+  initial-value:0deg }` then `@keyframes { to { --angle:360deg } }` animates a `conic-gradient(from
+  var(--angle) …)`; `syntax:"<color>"` animates gradient color-stops. Compositor-friendly animated
+  gradient heroes/loaders with zero JS (respect `prefers-reduced-motion`). Baseline since Jul 2024 —
+  and it's *why* Tailwind v4 requires `@property` + OKLCH-capable browsers.

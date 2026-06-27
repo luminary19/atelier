@@ -43,6 +43,34 @@ async function add(formData) {
 ```
 Always surface errors gracefully and preserve user input on failure.
 
+## Animated numbers (counters / prices / stats)
+`NumberFlow` (`@number-flow/react`; `number-flow` for Vue/Svelte/vanilla) — dependency-free, accessible
+rolling-digit transitions, `Intl.NumberFormat`-aware (currency/locale), respects reduced motion by default
+(`respectMotionPreference`, `useCanAnimate()`). The correct default over a hand-rolled odometer (usually
+janky *and* inaccessible). On Motion, `Motion+ AnimateNumber` is the equivalent (`trend` prop for spin direction).
+
+## CSS-native entry/exit & height:auto (no JS)
+- **Entry + exit:** `@starting-style` (the "from" on first render) + `transition-behavior: allow-discrete`
+  lets `display`/`overlay` animate, so popovers/dialogs/toasts fade in *and* out with zero JS — often
+  replacing `<AnimatePresence>`. Baseline; degrades to instant show/hide. Use Motion's `AnimatePresence`
+  only when you need spring exits, layout, or interruption.
+- **Accordions/disclosures:** animate to `height:auto` with `interpolate-size: allow-keywords` (set on
+  `:root`) then transition `height` 0→auto — no JS measuring. Chromium-only; degrades to an instant snap.
+
+## Layout / shared-element via GSAP Flip (explicit-control escalation)
+When you need FLIP between two *arbitrary* layout states and Motion's `layout`/`layoutId` (the React
+default) or Auto-Animate (zero-config) don't fit — vanilla/GSAP contexts, or precise control of the delta:
+```js
+import { Flip } from "gsap/Flip";            // free; gsap.registerPlugin(Flip)
+const state = Flip.getState(".item");        // 1. capture current positions/sizes
+container.classList.toggle("expanded");      // 2. mutate the DOM (reorder, add/remove, swap classes)
+Flip.from(state, { duration: 0.5, ease: "power2.inOut", absolute: true, nested: true }); // 3. animate the delta
+```
+Flip animates `transform` (+ clip) only, so it stays compositor-safe; gate it behind reduced motion like
+any movement. Keep it a **secondary** tool — Motion `layout`/`layoutId` stays the default for React UI.
+(Every GSAP plugin — Flip, SplitText, MorphSVG, DrawSVG, ScrollSmoother — is free now: install from the
+public `gsap` package, never an auth-token `.npmrc`.)
+
 ## Empty / loading / error states (the trinity)
 - **Empty** — an onboarding moment, not a void: explain the value + a clear primary CTA + maybe a sample.
 - **Loading** — prefer skeleton/optimistic over spinner; respond to input within 100ms; show progress for
@@ -51,9 +79,10 @@ Always surface errors gracefully and preserve user input on failure.
   dead-end. Pair with a non-color signifier (icon/text) for accessibility; announce via `aria-live`.
 
 ## Haptics
-`navigator.vibrate([10])` for confirmations on Android/mobile (iOS Safari support is limited — feature-
-detect, treat as enhancement). Short, meaningful patterns (select/success/error); never spam; never
-haptic-only — always pair with visual feedback. Respect OS settings.
+`navigator.vibrate([10])` for confirmations — but **Android Chrome/Edge/Samsung only (~77%); NOT iOS
+Safari (never implemented), NOT Firefox (removed 129+).** Feature-detect, treat as pure enhancement,
+requires a user gesture. Short, meaningful patterns (select/success/error); never spam; never haptic-only
+— always pair with visual feedback. Respect OS settings.
 
 ## Reduced motion across all of the above
 Skeleton → static (no shimmer). Like/celebration → instant state change (no bounce). Toasts/reveals →
